@@ -1,0 +1,8 @@
+The Unity runtime for Google Native Client uses the Mono library, licensed 
+under the LPGL v2. 
+
+The source code used for building mono for native client can be found at 
+https://github.com/elijahtaylor/mono/tree/1ca063d2a5a13adf7ec88711a1d01e5cd1dd8106
+
+Build scripts and instructions for building for native client can be found in 
+the "nacl" directory in that repository.
