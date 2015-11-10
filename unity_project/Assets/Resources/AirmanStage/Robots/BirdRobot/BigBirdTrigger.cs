@@ -9,7 +9,7 @@ public class BigBirdTrigger : MonoBehaviour
 		if ( other.tag == "Player" )
 		{
 			transform.parent.gameObject.GetComponent<BigBird>().Attack();
-			gameObject.collider.enabled = false;
+			gameObject.GetComponent<Collider>().enabled = false;
 		}
 	}
 }

@@ -40,7 +40,7 @@ public class ElectricRobot : MonoBehaviour
 	public void Reset()
 	{
 		m_isDead = false;
-		collider.enabled = true;
+		GetComponent<Collider>().enabled = true;
 		m_currentHealth = m_health;
 	}
 	
@@ -48,7 +48,7 @@ public class ElectricRobot : MonoBehaviour
 	void KillRobot()
 	{
 		m_isDead = true;
-		collider.enabled = false;
+		GetComponent<Collider>().enabled = false;
 	}
 	
 	/**/
@@ -76,7 +76,7 @@ public class ElectricRobot : MonoBehaviour
 		player = GameObject.FindGameObjectWithTag("Player").transform;
 		soundManager = GameObject.Find("SoundManager").gameObject;
 		platform = gameObject.transform.parent.GetComponent<CirclingPlatform>();
-		m_robotCollider = (BoxCollider) transform.parent.FindChild("PlatformBoxCollider").gameObject.collider;
+		m_robotCollider = (BoxCollider) transform.parent.FindChild("PlatformBoxCollider").gameObject.GetComponent<Collider>();
 		m_texScale = m_texScaleLeft;
 		m_currentHealth = m_health;
 	}
@@ -93,25 +93,25 @@ public class ElectricRobot : MonoBehaviour
 		if ( m_isDead == true )
 		{
 			// display the platform textures...
-			renderer.material = m_materials[(m_texIndex % 2) + 6 ];
-			renderer.material.SetTextureScale("_MainTex", m_texScaleLeft);
+			GetComponent<Renderer>().material = m_materials[(m_texIndex % 2) + 6 ];
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeft);
 			m_robotCollider.center = m_turningLeftColliderPos;
 		}
 		
 		// If the robot is shooting...
 		else if ( m_isShooting == true )
 		{
-			renderer.material = m_materials[(m_texIndex % 2) + 4 ];
+			GetComponent<Renderer>().material = m_materials[(m_texIndex % 2) + 4 ];
 			m_texScale = ( playerOnLeftSide == true) ? m_texScaleLeft : m_texScaleRight;
-			renderer.material.SetTextureScale("_MainTex", m_texScale);
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
 			m_robotCollider.center = (playerOnLeftSide == true) ? m_turningLeftColliderPos : m_turningRightColliderPos;
 		}
 		else
 		{
 			// Assign the material
-			renderer.material = m_materials[m_texIndex % 4];
+			GetComponent<Renderer>().material = m_materials[m_texIndex % 4];
 			m_texScale = ( playerOnLeftSide == true) ? m_texScaleLeft : m_texScaleRight;
-			renderer.material.SetTextureScale("_MainTex", m_texScale);
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
 			m_robotCollider.center = (playerOnLeftSide == true) ? m_turningLeftColliderPos : m_turningRightColliderPos;
 		}
 	}
@@ -124,7 +124,7 @@ public class ElectricRobot : MonoBehaviour
 		
 		Rigidbody shot = (Rigidbody) Instantiate(m_electricShot, transform.position, transform.rotation);
 		shot.transform.parent = gameObject.transform;
-		Physics.IgnoreCollision(shot.collider, collider);
+		Physics.IgnoreCollision(shot.GetComponent<Collider>(), GetComponent<Collider>());
 		
 		shot.GetComponent<ElectricShot>().TargetDirection = player.position;
 	}

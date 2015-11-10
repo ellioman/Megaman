@@ -39,7 +39,7 @@ public class Shooting : MonoBehaviour
 		
 		Rigidbody rocketClone = (Rigidbody) Instantiate(m_shotRigidBody, m_shotPos, transform.rotation);
 		rocketClone.transform.Rotate(90,0,0);
-		Physics.IgnoreCollision(rocketClone.collider, collider);
+		Physics.IgnoreCollision(rocketClone.GetComponent<Collider>(), GetComponent<Collider>());
 		
 		Shot s = rocketClone.GetComponent<Shot>();
 		s.VelocityDirection = ( isTurningLeft == true) ? -transform.right : transform.right;

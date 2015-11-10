@@ -33,7 +33,7 @@ public class Egg : MonoBehaviour
 	{
 		Rigidbody littleBirdRobot = (Rigidbody) Instantiate(littleBird, pos, transform.rotation);
 		littleBirdRobot.GetComponent<LittleBird>().Attack( goLeft, 7.0f + Random.Range(0.0f, 1.0f) );
-		Physics.IgnoreCollision(littleBirdRobot.collider, collider);
+		Physics.IgnoreCollision(littleBirdRobot.GetComponent<Collider>(), GetComponent<Collider>());
 	}
 	
 	/**/

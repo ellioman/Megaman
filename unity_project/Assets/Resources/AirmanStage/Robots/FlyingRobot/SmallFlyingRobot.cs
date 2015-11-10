@@ -97,13 +97,13 @@ public class SmallFlyingRobot : MonoBehaviour
 			else
 			{
 				direction.Normalize();
-				rigidbody.velocity = direction * (Time.deltaTime * m_robotSpeed);
+				GetComponent<Rigidbody>().velocity = direction * (Time.deltaTime * m_robotSpeed);
 			}
 		}
 		
 		// Update the textures...
 		m_texIndex = (int) (Time.time / m_texChangeInterval);
-		renderer.material = m_materials[m_texIndex % m_materials.Count];
+		GetComponent<Renderer>().material = m_materials[m_texIndex % m_materials.Count];
 	}
 }
 

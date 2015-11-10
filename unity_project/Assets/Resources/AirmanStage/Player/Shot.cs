@@ -94,6 +94,6 @@ public class Shot : MonoBehaviour
 			Destroy(gameObject);
 		}
 		
-		rigidbody.velocity = VelocityDirection * ShotSpeed;
+		GetComponent<Rigidbody>().velocity = VelocityDirection * ShotSpeed;
 	}
 }

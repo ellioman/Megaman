@@ -67,7 +67,7 @@ public class CameraTrigger : MonoBehaviour
 			{
 				m_player.IsFrozen = false;
 				m_door.SendMessage("closeDoor");
-				collider.enabled = false;
+				GetComponent<Collider>().enabled = false;
 			}
 		}
     }

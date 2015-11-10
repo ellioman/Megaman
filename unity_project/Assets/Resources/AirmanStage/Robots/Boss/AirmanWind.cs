@@ -47,12 +47,7 @@ public class AirmanWind : MonoBehaviour
 		this.m_texScale = (this.m_shouldBlowLeft) ? m_texScaleLeft : m_texScaleRight;
 	}
 	
-	/**/
-	void GoAway()
-	{
-		this.m_leaving = true;
-		this.collider.isTrigger = true;
-	}
+
 	
 	/* Use this for initialization */
 	void Start () 
@@ -75,8 +70,8 @@ public class AirmanWind : MonoBehaviour
 		
 		// Update the textures...
 		this.m_texIndex = (int) (Time.time / m_texChangeInterval);
-		renderer.material = m_materials[m_texIndex % (m_materials.Count-1)];
-		renderer.material.SetTextureScale("_MainTex", m_texScale);
+		GetComponent<Renderer>().material = m_materials[m_texIndex % (m_materials.Count-1)];
+		GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
 		
 		// If the wind is being blown away...
 		if ( this.m_leaving == true )
@@ -91,5 +86,12 @@ public class AirmanWind : MonoBehaviour
 				transform.position += new Vector3(20.0f * Time.deltaTime , 0f, 0f );
 			}				
 		}
+	}
+
+	//
+	public void GoAway()
+	{
+		this.m_leaving = true;
+		this.GetComponent<Collider>().isTrigger = true;
 	}
 }

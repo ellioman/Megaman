@@ -95,7 +95,7 @@ public class SoundManager : MonoBehaviour
 	}
 	
 	/* Use this for initialization */
-	private void Start () 
+	private void Awake() 
 	{		
 		AudioClip stageMusic = (AudioClip) Resources.Load( path + "StageMusic" );
 		m_stageMusic = AddAudio(stageMusic, true, true, 0.50f);

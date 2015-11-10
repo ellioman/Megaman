@@ -57,7 +57,7 @@ public class Player : MonoBehaviour
 		m_health.Reset();
 		m_movement.Reset();
 		m_shooting.Reset();
-		m_playerTexture.renderer.enabled = true;
+		m_playerTexture.GetComponent<Renderer>().enabled = true;
 		IsPlayerInactive = false;
 	}
 	
@@ -65,7 +65,7 @@ public class Player : MonoBehaviour
 	void CreateDeathParticle( float speed, Vector3 pos, Vector3 vel )
 	{
 		Rigidbody particle = (Rigidbody) Instantiate(m_deathParticle, pos, transform.rotation);
-		Physics.IgnoreCollision(particle.collider, collider);
+		Physics.IgnoreCollision(particle.GetComponent<Collider>(), GetComponent<Collider>());
 		particle.transform.Rotate(90,0,0);
 		particle.velocity =  vel * speed;
 	}
@@ -122,14 +122,14 @@ public class Player : MonoBehaviour
 	/**/
 	private IEnumerator MakeThePlayerLeaveStage()
 	{
-		m_playerTexture.renderer.material = m_playerMaterials[14];
+		m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[14];
 		yield return new WaitForSeconds(0.05f);
 		
-		m_playerTexture.renderer.material = m_playerMaterials[15];
+		m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[15];
 		yield return new WaitForSeconds(0.05f);
 		
 		m_soundManager.PlayMegamanLeavesStageSound();
-		m_playerTexture.renderer.material = m_playerMaterials[16];
+		m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[16];
 		m_playerTexture.transform.localScale = new Vector3( 0.04f, 1.0f, 0.2f );
 		StartCoroutine( "MovePlayerUp" );
 		
@@ -170,7 +170,7 @@ public class Player : MonoBehaviour
 		/* Before the wait... */
 		m_health.IsDead = true;
 		m_movement.IsFrozen = true;
-		m_playerTexture.renderer.enabled = false;
+		m_playerTexture.GetComponent<Renderer>().enabled = false;
 		m_camera.ShouldStayStill = true;
 		m_shooting.CanShoot = false;
 		
@@ -215,7 +215,7 @@ public class Player : MonoBehaviour
 		GameObject[] birdTriggers = GameObject.FindGameObjectsWithTag( "birdTrigger" );
 		foreach( GameObject trigger in birdTriggers )
 		{
-			trigger.collider.enabled = true;	
+			trigger.GetComponent<Collider>().enabled = true;	
 		}
 		
 		/* Start another wait to avoid double deaths by the hand of deathtriggers... */
@@ -225,7 +225,7 @@ public class Player : MonoBehaviour
 		GameObject[] triggers = GameObject.FindGameObjectsWithTag( "deathTrigger" );
 		foreach( GameObject trigger in triggers )
 		{
-			trigger.collider.enabled = true;	
+			trigger.GetComponent<Collider>().enabled = true;	
 		}
 	}
 	
@@ -261,20 +261,20 @@ public class Player : MonoBehaviour
 		if ( m_health.IsHurting == true && m_health.IsDead == false )
 		{
 			m_playerTexture.transform.localScale = new Vector3( 0.1175f, 1.0f, 0.1175f );
-			m_playerTexture.renderer.material = m_playerMaterials[7];
-			m_playerTexture.renderer.material.color *= 0.75f + Random.value;
+			m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[7];
+			m_playerTexture.GetComponent<Renderer>().material.color *= 0.75f + Random.value;
 		}
 		else if ( m_movement.IsJumping == true )
 		{
 			if ( m_shooting.IsShooting == true )
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.1175f, 1.0f, 0.1175f );
-				m_playerTexture.renderer.material = m_playerMaterials[9];
+				m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[9];
 			}
 			else
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.1175f, 1.0f, 0.1175f );
-				m_playerTexture.renderer.material = m_playerMaterials[2];
+				m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[2];
 			}
 		}
 		else if ( m_movement.IsWalking == true )
@@ -284,12 +284,12 @@ public class Player : MonoBehaviour
 			if ( m_shooting.IsShooting == true )
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.13f, 1.0f, 0.1f );
-				m_playerTexture.renderer.material = m_playerMaterials[ (m_walkingTexIndex % 4) + 10];
+				m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[ (m_walkingTexIndex % 4) + 10];
 			}
 			else
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.1f, 1.0f, 0.1f );
-				m_playerTexture.renderer.material = m_playerMaterials[ (m_walkingTexIndex % 4) + 3];
+				m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[ (m_walkingTexIndex % 4) + 3];
 			}
 		}
 		// Standing...
@@ -298,17 +298,17 @@ public class Player : MonoBehaviour
 			if ( m_shooting.IsShooting == true )
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.128f, 1.0f, 0.1f );
-				m_playerTexture.renderer.material = m_playerMaterials[8];
+				m_playerTexture.GetComponent<Renderer>().material = m_playerMaterials[8];
 			}
 			else
 			{
 				m_playerTexture.transform.localScale = new Vector3( 0.1f, 1.0f, 0.1f );
 				m_standingTexIndex = (int) (Time.time / m_standingTexInterval);
-				m_playerTexture.renderer.material = ( m_standingTexIndex % 10 == 0 ) ? m_playerMaterials[1] : m_playerMaterials[0];
+				m_playerTexture.GetComponent<Renderer>().material = ( m_standingTexIndex % 10 == 0 ) ? m_playerMaterials[1] : m_playerMaterials[0];
 			}
 		}
 		
-		m_playerTexture.renderer.material.SetTextureScale("_MainTex", (m_movement.IsTurningLeft) ? m_texScaleLeft : m_texScaleRight  );
+		m_playerTexture.GetComponent<Renderer>().material.SetTextureScale("_MainTex", (m_movement.IsTurningLeft) ? m_texScaleLeft : m_texScaleRight  );
 	}
 	
 	

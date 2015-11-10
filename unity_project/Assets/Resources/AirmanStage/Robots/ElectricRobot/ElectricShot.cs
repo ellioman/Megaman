@@ -32,11 +32,11 @@ public class ElectricShot : MonoBehaviour
 		{
 			if ( m_targetDirection.y <= 0.0f )
 			{
-				renderer.material.SetTextureScale("_MainTex", m_texScaleLeftDown);
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeftDown);
 			}
 			else 
 			{
-				renderer.material.SetTextureScale("_MainTex", m_texScaleLeftUp);
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeftUp);
 			}
 		}
 		// Right...
@@ -44,10 +44,10 @@ public class ElectricShot : MonoBehaviour
 		{
 			if ( m_targetDirection.y <= 0.0f )
 			{
-				renderer.material.SetTextureScale("_MainTex", m_texScaleRightDown);
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleRightDown);
 			}
 			else {
-				renderer.material.SetTextureScale("_MainTex", m_texScaleRightUp);
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleRightUp);
 			}
 		}
 	}
@@ -84,7 +84,7 @@ public class ElectricShot : MonoBehaviour
 	/* Update is called once per frame */
 	void Update ()
 	{
-		rigidbody.velocity = m_targetDirection * m_speed * Time.deltaTime;
+		GetComponent<Rigidbody>().velocity = m_targetDirection * m_speed * Time.deltaTime;
 		
 		if ( Time.time - m_timeStart >= m_lifeSpan )
 		{

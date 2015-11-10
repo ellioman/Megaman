@@ -44,7 +44,7 @@ public class ElectricFloorRobot : MonoBehaviour
 			
 			Vector3 pos = transform.position + Vector3.up * 0.8f + Vector3.right * 0.1f;
 			Rigidbody electricShot = (Rigidbody) Instantiate(m_shot, pos, transform.rotation);
-			Physics.IgnoreCollision(electricShot.collider, collider);
+			Physics.IgnoreCollision(electricShot.GetComponent<Collider>(), GetComponent<Collider>());
 			electricShot.GetComponent<ElectricFloorRobotShot>().Attack( m_player.transform.position );
 			electricShot.transform.parent = gameObject.transform;
 		}

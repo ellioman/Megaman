@@ -85,13 +85,13 @@ public class PlayerOLD : MonoBehaviour
 	void SetIsJumping( bool status ) 		{ this.isJumping = status; }
 	void SetReachedJumpingTop( bool status ){ this.reachedJumpingTop = status; }
 	void SetCanShoot( bool status ){ this.canShoot = status; }
-	void SetUseGravity( bool status ){ this.rigidbody.useGravity = status; }
+	void SetUseGravity( bool status ){ this.GetComponent<Rigidbody>().useGravity = status; }
 	
 	/* */
 	void SetIsFrozen( bool status )
 	{ 
 		this.isFrozen = status; 
-		rigidbody.useGravity = !status;
+		GetComponent<Rigidbody>().useGravity = !status;
 	}
 	
 	/**/
@@ -105,7 +105,7 @@ public class PlayerOLD : MonoBehaviour
 	void CreateDeathParticle( float speed, Vector3 pos, Vector3 vel )
 	{
 		Rigidbody particle = (Rigidbody) Instantiate(deathParticle, pos, transform.rotation);
-		Physics.IgnoreCollision(particle.collider, collider);
+		Physics.IgnoreCollision(particle.GetComponent<Collider>(), GetComponent<Collider>());
 		particle.transform.Rotate(90,0,0);
 		particle.velocity =  vel * speed;
 	}
@@ -153,7 +153,7 @@ public class PlayerOLD : MonoBehaviour
 		// Before the wait...
 		this.isFrozen = true;
 		this.isDead = true;
-		this.renderer.enabled = false;
+		this.GetComponent<Renderer>().enabled = false;
 		
 		soundManager.SendMessage("StopStageMusic");
 		soundManager.SendMessage("StopBossTheme");
@@ -166,7 +166,7 @@ public class PlayerOLD : MonoBehaviour
 		
 		// Reset the player
 		ResetPlayer();
-		this.renderer.enabled = true;
+		this.GetComponent<Renderer>().enabled = true;
 		
 		// Reset all the enemy bots...
 		GameObject[] enemyRobots = GameObject.FindGameObjectsWithTag("enemyRobot");
@@ -260,7 +260,7 @@ public class PlayerOLD : MonoBehaviour
 		// If something else is controlling the player movement...
 		else if ( this.shouldOverrideNormalMovement == true )
 		{
-			rigidbody.velocity = movingPlatformVelocity;
+			GetComponent<Rigidbody>().velocity = movingPlatformVelocity;
 		}
 		
 		// Otherwise, calculate the movement of the player...
@@ -311,8 +311,8 @@ public class PlayerOLD : MonoBehaviour
 			boxCollider.size = new Vector3 (boxColliderWidth / 2.3f, boxColliderHeight / 2.3f, 1f);
 			boxCollider.center = new Vector3 (0f, boxColliderCenter, 0f);
 			
-			this.renderer.material = mats[7];
-			this.renderer.material.color *= 0.75f + Random.value;
+			this.GetComponent<Renderer>().material = mats[7];
+			this.GetComponent<Renderer>().material.color *= 0.75f + Random.value;
 		}
 		else if ( this.isJumping == true )
 		{
@@ -320,7 +320,7 @@ public class PlayerOLD : MonoBehaviour
 			boxCollider.size = new Vector3 (0.5f, 1.875f / 2.4f, 1f);
 			boxCollider.center = new Vector3 (0f, -0.073f, 0f);
 			
-			this.renderer.material = mats[2];
+			this.GetComponent<Renderer>().material = mats[2];
 		}
 		else if ( this.isWalking )
 		{
@@ -329,7 +329,7 @@ public class PlayerOLD : MonoBehaviour
 			boxCollider.center = new Vector3 (0f, boxColliderCenter, 0f);
 			
 			this.walkingTexIndex = (int) (Time.time / this.walkingTexInterval);
-			this.renderer.material = mats[ (walkingTexIndex % 4) + 3];
+			this.GetComponent<Renderer>().material = mats[ (walkingTexIndex % 4) + 3];
 		}
 		else 
 		{
@@ -338,9 +338,9 @@ public class PlayerOLD : MonoBehaviour
 			boxCollider.center = new Vector3 (0f, boxColliderCenter, 0f);
 			
 			this.standingTexIndex = (int) (Time.time / this.standingTexInterval);
-			this.renderer.material = ( standingTexIndex % 10 == 0 ) ? mats[1] : mats[0];
+			this.GetComponent<Renderer>().material = ( standingTexIndex % 10 == 0 ) ? mats[1] : mats[0];
 		}
-		this.renderer.material.SetTextureScale("_MainTex", texScale);
+		this.GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScale);
 	}
 	
 	/* Create a shot in the direction the player is facing... */
@@ -349,7 +349,7 @@ public class PlayerOLD : MonoBehaviour
 		if (this.isTurningRight == true)
 		{
 			Rigidbody rocketClone = (Rigidbody) Instantiate(shot, transform.position, transform.rotation);
-			Physics.IgnoreCollision(rocketClone.collider, collider);
+			Physics.IgnoreCollision(rocketClone.GetComponent<Collider>(), GetComponent<Collider>());
 			Physics.IgnoreLayerCollision(8,9, true);
 			Physics.IgnoreLayerCollision(11,9, true);
 			rocketClone.transform.Rotate(90,0,0);
@@ -359,7 +359,7 @@ public class PlayerOLD : MonoBehaviour
 		else
 		{
 			Rigidbody rocketClone = (Rigidbody) Instantiate(shot, transform.position, transform.rotation);
-			Physics.IgnoreCollision(rocketClone.collider, collider);
+			Physics.IgnoreCollision(rocketClone.GetComponent<Collider>(), GetComponent<Collider>());
 			Physics.IgnoreLayerCollision(8,9, true);
 			Physics.IgnoreLayerCollision(11,9, true);
 			rocketClone.transform.Rotate(90,0,0);
@@ -415,7 +415,7 @@ public class PlayerOLD : MonoBehaviour
 			this.transform.position += this.movingPlatformVelocity;
 		}
 		
-		this.rigidbody.velocity = this.tempVelocity;
+		this.GetComponent<Rigidbody>().velocity = this.tempVelocity;
 	}
 	
 	/**/
@@ -446,7 +446,7 @@ public class PlayerOLD : MonoBehaviour
 			this.isTurningRight = true;
 			this.isWalking = true;
 			this.texScale = this.texScaleRight;
-			renderer.material.SetTextureScale("_MainTex", texScaleRight);
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleRight);
 			hVelocity = Vector3.right * Time.deltaTime * walkSpeed;
 		}
 		else if (h_value < 0.0 && canMoveLeft == true ) 
@@ -454,7 +454,7 @@ public class PlayerOLD : MonoBehaviour
 			this.isTurningRight = false;
 			this.isWalking = true;
 			this.texScale = this.texScaleLeft;
-			renderer.material.SetTextureScale("_MainTex", texScaleLeft);
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleLeft);
 			hVelocity = Vector3.left * Time.deltaTime * walkSpeed;
 		}
 		else if ( h_value == 0.0f)
@@ -481,7 +481,7 @@ public class PlayerOLD : MonoBehaviour
 			this.reachedJumpingTop = false;
 			this.canMoveUp = false;
 			this.jumpYPos = transform.position.y;
-			rigidbody.useGravity = false;
+			GetComponent<Rigidbody>().useGravity = false;
 //			rigidbody.drag = this.jumpingDrag;
 		}
 		
@@ -499,7 +499,7 @@ public class PlayerOLD : MonoBehaviour
 				{
 					this.reachedJumpingTop = true;
 					Physics.gravity = this.gravity;
-					rigidbody.useGravity = true;
+					GetComponent<Rigidbody>().useGravity = true;
 //					rigidbody.drag = this.fallingDrag;
 				}
 				
@@ -513,8 +513,8 @@ public class PlayerOLD : MonoBehaviour
 			else
 			{
 				this.reachedJumpingTop = true;
-				rigidbody.useGravity = true;
-				rigidbody.drag = this.fallingDrag;
+				GetComponent<Rigidbody>().useGravity = true;
+				GetComponent<Rigidbody>().drag = this.fallingDrag;
 			}
 				
 		}
@@ -525,7 +525,7 @@ public class PlayerOLD : MonoBehaviour
 	/* Move freely inside the stage ...*/
 	void CalculateCheatMovements() 
 	{
-		rigidbody.isKinematic = true;
+		GetComponent<Rigidbody>().isKinematic = true;
 		Physics.gravity = new Vector3(0.0f, 0.0f, 0.0f);
 		Vector3 pos = transform.position;
 		float h_value = Input.GetAxis ("Horizontal");
@@ -533,12 +533,12 @@ public class PlayerOLD : MonoBehaviour
 		if (h_value > 0.0) 
 		{
 			pos = pos + Vector3.right * Time.deltaTime * walkSpeed / d;
-			renderer.material.SetTextureScale("_MainTex", new Vector2(texScaleRight.x, texScaleRight.y));
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", new Vector2(texScaleRight.x, texScaleRight.y));
 		}
 		else if (h_value < 0.0) 
 		{
 			pos = pos + Vector3.left * Time.deltaTime * walkSpeed / d;
-			renderer.material.SetTextureScale("_MainTex", new Vector2(texScaleLeft.x, texScaleLeft.y));
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", new Vector2(texScaleLeft.x, texScaleLeft.y));
 		}
 		
 		float v_value = Input.GetAxis ("Vertical");

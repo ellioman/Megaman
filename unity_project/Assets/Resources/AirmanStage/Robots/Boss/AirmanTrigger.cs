@@ -1,29 +1,41 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections;
 
 public class AirmanTrigger : MonoBehaviour
 {
-//	public Transform boss;
-	private AirmanBoss m_airman;
-		
-	/* */
-	void OnTriggerEnter(Collider other) 
+	#region Variables
+	
+	// Protected Instance Variables
+	protected AirmanBoss airman;
+	protected Collider col;
+
+	#endregion
+
+
+	#region MonoBehaviour
+	
+	// Constructor
+	protected void Awake ()
 	{
-		m_airman.gameObject.SetActive( true );
-		m_airman.SetUpAirman();
-		this.collider.enabled = false;
+		airman = FindObjectOfType<AirmanBoss>();
+		Assert.IsNotNull(airman);
 	}
 	
-	/* Constructor */
-	void Awake ()
+	// Use this for initialization
+	protected void Start ()
 	{
-		m_airman = GameObject.Find("Airman").GetComponent<AirmanBoss>();
+		airman.gameObject.SetActive(false);
 	}
-	
-	/* Constructor */
-	void Start ()
+
+	// 
+	protected void OnTriggerEnter(Collider other) 
 	{
-		m_airman.gameObject.SetActive( false );
+		airman.gameObject.SetActive(true);
+		airman.SetUpAirman();
+		col.enabled = false;
 	}
+
+	#endregion
 }
 

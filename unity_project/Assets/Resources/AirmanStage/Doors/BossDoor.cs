@@ -54,7 +54,7 @@ public class BossDoor : MonoBehaviour
 	void openDoor()
 	{
 		m_soundManager.PlayBossDoorSound();
-		gameObject.collider.isTrigger = true;
+		gameObject.GetComponent<Collider>().isTrigger = true;
 		m_opening = true;
 	}
 	
@@ -62,7 +62,7 @@ public class BossDoor : MonoBehaviour
 	void closeDoor()
 	{
 		m_soundManager.PlayBossDoorSound();
-		gameObject.collider.isTrigger = false;
+		gameObject.GetComponent<Collider>().isTrigger = false;
 		m_closing = true;
 	}	
 	

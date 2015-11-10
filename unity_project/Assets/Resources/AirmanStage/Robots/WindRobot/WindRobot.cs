@@ -34,8 +34,8 @@ public class WindRobot : MonoBehaviour
 	public void Reset()
 	{
 		m_isDead = false;
-		renderer.enabled = true;
-		collider.enabled = true;
+		GetComponent<Renderer>().enabled = true;
+		GetComponent<Collider>().enabled = true;
 		m_currentHealth = m_health;
 	}
 	
@@ -43,8 +43,8 @@ public class WindRobot : MonoBehaviour
 	void KillRobot()
 	{
 		m_isDead = true;
-		renderer.enabled = false;
-		collider.enabled = false;
+		GetComponent<Renderer>().enabled = false;
+		GetComponent<Collider>().enabled = false;
 	}
 	
 	/**/
@@ -128,7 +128,7 @@ public class WindRobot : MonoBehaviour
 		if ( m_armsUp == true )
 		{
 			m_texIndex = (int) (Time.time / m_texArmsUpInterval);
-			renderer.material = mats[(m_texIndex % 2) + 2 ];
+			GetComponent<Renderer>().material = mats[(m_texIndex % 2) + 2 ];
 			
 			if ( Time.time - m_texChangeTimer >= 0.35f )
 			{
@@ -139,7 +139,7 @@ public class WindRobot : MonoBehaviour
 		else
 		{
 			m_texIndex = (int) (Time.time / m_texArmsDownInterval);
-			renderer.material = mats[(m_texIndex % 2) ];
+			GetComponent<Renderer>().material = mats[(m_texIndex % 2) ];
 			
 			if ( Time.time - m_texChangeTimer >= 1.99f )
 			{
@@ -148,7 +148,7 @@ public class WindRobot : MonoBehaviour
 			}
 		}
 		
-		renderer.material.SetTextureScale("_MainTex", m_texScale);
+		GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
 	}
 	
 	/* Update is called once per frame */

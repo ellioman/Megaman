@@ -49,7 +49,7 @@ public class RedHornBeast : MonoBehaviour
 		m_shouldAppear = false;
 		m_startFighting = false;
 		m_color = new Vector4(0f, 0f, 0f, 0f);
-		renderer.material.color = m_color;
+		GetComponent<Renderer>().material.color = m_color;
 		
 		Vector3 spikePos;
 		spikePos = m_spikeLeft.transform.position;
@@ -58,9 +58,9 @@ public class RedHornBeast : MonoBehaviour
 		spikePos.x = m_spikeRight.transform.position.x;
 		m_spikeRight.transform.position = spikePos;
 		
-		m_spikeLeft.renderer.material.color = m_color;
-		m_spikeRight.renderer.material.color = m_color;
-		m_light.renderer.enabled = false;
+		m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
+		m_spikeRight.GetComponent<Renderer>().material.color = m_color;
+		m_light.GetComponent<Renderer>().enabled = false;
 		m_createRobotOnRightSide = true;
 	}
 	
@@ -97,14 +97,14 @@ public class RedHornBeast : MonoBehaviour
 	/* Use this for initialization */
 	void Start ()
 	{
-		m_light.renderer.enabled = false;
+		m_light.GetComponent<Renderer>().enabled = false;
 		m_spikeLeftPos = m_spikeLeft.transform.localPosition;
 		m_spikeStartHeight = m_spikeLeft.transform.position.y;
 		
 		// Make the robot and its children invisible...
-		renderer.material.color = m_color;
-		m_spikeLeft.renderer.material.color = m_color;
-		m_spikeRight.renderer.material.color = m_color;
+		GetComponent<Renderer>().material.color = m_color;
+		m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
+		m_spikeRight.GetComponent<Renderer>().material.color = m_color;
 	}
 	
 	/* Update is called once per frame */
@@ -136,9 +136,9 @@ public class RedHornBeast : MonoBehaviour
 				m_color.x = m_color.y = m_color.z = m_color.w += Time.deltaTime * 3.5f;
 			} 
 			
-			renderer.material.color = m_color;
-			m_spikeLeft.renderer.material.color = m_color;
-			m_spikeRight.renderer.material.color = m_color;
+			GetComponent<Renderer>().material.color = m_color;
+			m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
+			m_spikeRight.GetComponent<Renderer>().material.color = m_color;
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class RedHornBeast : MonoBehaviour
 	void CreateRobot( float speed, Vector3 pos, Vector3 vel )
 	{
 		Rigidbody robot = (Rigidbody) Instantiate(flyingRobot, pos, transform.rotation);
-		Physics.IgnoreCollision(robot.collider, collider);
+		Physics.IgnoreCollision(robot.GetComponent<Collider>(), GetComponent<Collider>());
 		robot.transform.parent = gameObject.transform;
 		robot.velocity =  vel;
 	}
@@ -220,7 +220,7 @@ public class RedHornBeast : MonoBehaviour
 		if ( Time.time - m_lightStartTime >= 0.1f )
 		{
 			m_lightStartTime = Time.time;
-			m_light.renderer.enabled = !m_light.renderer.enabled;
+			m_light.GetComponent<Renderer>().enabled = !m_light.GetComponent<Renderer>().enabled;
 		}
 	}
 }

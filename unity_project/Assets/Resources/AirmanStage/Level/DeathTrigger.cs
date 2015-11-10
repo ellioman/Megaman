@@ -12,7 +12,7 @@ public class DeathTrigger : MonoBehaviour
 		if ( other.tag == "Player" )
 		{
 			other.gameObject.GetComponent<Player>().KillPlayer();
-			gameObject.collider.enabled = false;
+			gameObject.GetComponent<Collider>().enabled = false;
 		}
     }
 }
