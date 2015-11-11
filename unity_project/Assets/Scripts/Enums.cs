@@ -1,0 +1,16 @@
+﻿
+// Sound enums...
+public enum AirmanLevelSounds
+{
+	STAGE,
+	STAGE_END,
+	LEAVE_LEVEL,
+	DEATH,
+	HURTING,
+	LANDING,
+	SHOOTING,
+	BOSS_MUSIC,
+	BOSS_DOOR,
+	BOSS_HURTING,
+	HEALTHBAR_FILLING
+}
