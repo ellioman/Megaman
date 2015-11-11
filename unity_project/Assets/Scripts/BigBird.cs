@@ -6,13 +6,13 @@ public class BigBird : MonoBehaviour
 	#region Variables
 
 	// Protected Instance Variables
-	protected Egg m_egg;
-	protected bool m_moving = false;
-	protected bool m_attacking = false;
-	protected float m_speed = 10.0f;
-	protected float m_lifeSpan = 5.0f;
-	protected float m_lifeTimer;
-	protected float m_damage = 20.0f;
+	protected Egg egg;
+	protected bool moving = false;
+	protected bool attacking = false;
+	protected float speed = 10.0f;
+	protected float lifeSpan = 5.0f;
+	protected float lifeTimer;
+	protected float damage = 20.0f;
 
 	#endregion
 
@@ -22,38 +22,38 @@ public class BigBird : MonoBehaviour
 	// Constructor 
 	protected void Awake ()
 	{
-		m_egg = gameObject.GetComponentInChildren<Egg>();
+		egg = gameObject.GetComponentInChildren<Egg>();
 	}
 
 	// Update is called once per frame
 	protected void Update () 
 	{
-		if ( m_moving == true )
+		if (moving == true)
 		{
-			transform.position += (-Vector3.right * m_speed * Time.deltaTime);
+			transform.position += (-Vector3.right * speed * Time.deltaTime);
 			
-			if ( Time.time - m_lifeTimer >= m_lifeSpan )
+			if (Time.time - lifeTimer >= lifeSpan)
 			{
-				Destroy ( gameObject );	
+				Destroy (gameObject);	
 			}
 		}
 		
-		if ( m_attacking == true )
+		if (attacking == true)
 		{
-			if ( Mathf.Abs(Player.Instance.transform.position.x - transform.position.x) <= 10.0f )
+			if (Mathf.Abs(GameEngine.Player.transform.position.x - transform.position.x) <= 10.0f)
 			{
-				m_egg.ReleaseEgg( m_speed );
-				m_attacking = false;
+				egg.ReleaseEgg(speed);
+				attacking = false;
 			}
 		}
 	}
 	
 	//
-	protected void OnTriggerEnter( Collider other )
+	protected void OnTriggerEnter(Collider other)
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			Player.Instance.TakeDamage( m_damage );
+			GameEngine.Player.TakeDamage(damage);
 		}
 	}
 
@@ -63,18 +63,24 @@ public class BigBird : MonoBehaviour
 	#region Public Functions
 	
 	//
-	public void TakeDamage( float dam )
+	public void TakeDamage(float dam)
 	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_HURTING);
-		Destroy ( gameObject );
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_HURTING);
+		Destroy (gameObject);
 	}
 	
 	// 
 	public void Attack()
 	{
-		m_lifeTimer = Time.time;
-		m_moving = true;
-		m_attacking = true;
+		lifeTimer = Time.time;
+		moving = true;
+		attacking = true;
+	}
+
+	//
+	public void Reset()
+	{
+
 	}
 	
 	#endregion

@@ -22,35 +22,17 @@ public class SoundManager : MonoBehaviour
 	#endregion
 
 
-	#region Statics
-	
-	// Singleton
-	protected static SoundManager instance = null;
-	public static SoundManager Instance
-	{
-		get
-		{
-			if (instance == null)
-			{
-				instance = (SoundManager) FindObjectOfType(typeof(SoundManager));
-			}
-			
-			return instance;
-		}
-		protected set
-		{
-			instance = value;
-		}
-	}
-	
-	#endregion
-
-
 	#region MonoBehaviour
 
-	// Use this for initialization
+	// Constructor
 	protected void Awake() 
-	{		
+	{
+		GameEngine.SoundManager = this;
+	}
+
+	// Use this for initialization
+	protected void Start()
+	{
 		AudioClip stageMusicClip = (AudioClip) Resources.Load( path + "StageMusic" );
 		stageMusic = AddAudio(stageMusicClip, true, true, 0.50f);
 		
@@ -87,10 +69,10 @@ public class SoundManager : MonoBehaviour
 		Play(AirmanLevelSounds.STAGE);
 	}
 
-	// 
+	// Called when the behaviour becomes disabled or inactive
 	protected void OnDisable()
 	{
-		instance = null;
+		GameEngine.SoundManager = null;
 	}
 
 	#endregion

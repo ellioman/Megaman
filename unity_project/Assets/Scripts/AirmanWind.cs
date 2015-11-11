@@ -1,97 +1,117 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections;
 using System.Collections.Generic;
 
 public class AirmanWind : MonoBehaviour 
 {
-	// Unity Editor Variables
-	public List<Material> m_materials;
-	
-	// Private Instance Variables
-	private bool m_leaving = false;
-	private bool m_beginSequence = true;
-	private bool m_shouldBlowLeft = true;
-	private float m_texChangeInterval = 0.1f;
-	private float m_damage = 10.0f; 
-	private int m_texIndex = 0;
-	private Vector2 m_texScale;
-	private Vector2 m_texScaleRight = new Vector2(1.0f, -1.0f);
-	private Vector2 m_texScaleLeft = new Vector2(-1.0f, -1.0f);
-	private Vector3 m_windPosition;
-	
-	// Called when the Collider other enters the trigger.
-	protected void OnTriggerEnter(Collider other) 
-	{
-		if ( other.tag == "Player" )
-		{
-			other.gameObject.SendMessage("TakeDamage", this.m_damage );
-		}
-		else if ( other.tag == "shot" )
-		{
-			if ( this.m_shouldBlowLeft == true )
-			{
-				other.GetComponent<Shot>().VelocityDirection = new Vector3( -1f, 1f, 0f );
-			}
-			else
-			{
-				other.GetComponent<Shot>().VelocityDirection = new Vector3( 1f, 1f, 0f );
-			}
-		}
-	}
-	
-	/**/
-	void SetPosition( Vector3 pos )
-	{
-		this.m_windPosition = pos;
-		this.m_shouldBlowLeft = (pos.x - transform.position.x < 0.0f );
-		this.m_texScale = (this.m_shouldBlowLeft) ? m_texScaleLeft : m_texScaleRight;
-	}
-	
+	#region Variables
 
+	// Unity Editor Variables
+	public List<Material> animationMaterials;
 	
-	/* Use this for initialization */
-	void Start () 
+	// Protected Instance Variables
+	protected int texIndex = 0;
+	protected bool leaving = false;
+	protected bool beginSequence = true;
+	protected bool shouldBlowLeft = true;
+	protected float texChangeInterval = 0.1f;
+	protected float damage = 10.0f; 
+	protected Vector2 texScale = Vector2.zero;
+	protected Vector2 texScaleRight = new Vector2(1.0f, -1.0f);
+	protected Vector2 texScaleLeft = new Vector2(-1.0f, -1.0f);
+	protected Vector3 windPosition = Vector3.zero;
+	protected Renderer rend = null;
+
+	#endregion
+	
+	
+	#region MonoBehaviour
+
+	// Constructor
+	protected void Awake()
 	{
-		
+		rend = GetComponent<Renderer>();
+		Assert.IsNotNull(rend);
 	}
-	
-	/* Update is called once per frame */
-	void Update () 
+
+	// Update is called once per frame
+	protected void Update () 
 	{
-		if ( this.m_beginSequence == true )
+		if (beginSequence == true)
 		{
-			transform.position += (this.m_windPosition - transform.position) * Time.deltaTime * 3.0f;
+			transform.position += (windPosition - transform.position) * Time.deltaTime * 3.0f;
 			
-			if ( (this.m_windPosition - transform.position).magnitude <= 1.0f )
+			if ((windPosition - transform.position).magnitude <= 1.0f)
 			{
-				this.m_beginSequence = false;
+				beginSequence = false;
 			}
 		}
 		
 		// Update the textures...
-		this.m_texIndex = (int) (Time.time / m_texChangeInterval);
-		GetComponent<Renderer>().material = m_materials[m_texIndex % (m_materials.Count-1)];
-		GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
+		texIndex = (int) (Time.time / texChangeInterval);
+		rend.material = animationMaterials[texIndex % (animationMaterials.Count-1)];
+		rend.material.SetTextureScale("_MainTex", texScale);
 		
 		// If the wind is being blown away...
-		if ( this.m_leaving == true )
+		if (leaving == true)
 		{
 			// Move the wind away...
-			if ( this.m_shouldBlowLeft )
+			if (shouldBlowLeft)
 			{
-				transform.position -= new Vector3(20.0f * Time.deltaTime , 0f, 0f );
+				transform.position -= new Vector3(20.0f * Time.deltaTime , 0f, 0f);
 			}
 			else
 			{
-				transform.position += new Vector3(20.0f * Time.deltaTime , 0f, 0f );
+				transform.position += new Vector3(20.0f * Time.deltaTime , 0f, 0f);
 			}				
 		}
 	}
 
+	// Called when the Collider other enters the trigger.
+	protected void OnTriggerEnter(Collider other) 
+	{
+		if (other.tag == "Player")
+		{
+			other.gameObject.SendMessage("TakeDamage", damage);
+		}
+		else if (other.tag == "shot")
+		{
+			if (shouldBlowLeft == true)
+			{
+				other.GetComponent<Shot>().VelocityDirection = new Vector3(-1f, 1f, 0f);
+			}
+			else
+			{
+				other.GetComponent<Shot>().VelocityDirection = new Vector3(1f, 1f, 0f);
+			}
+		}
+	}
+
+	#endregion
+	
+	
+	#region Protected Functions
+
+	// 
+	protected void SetPosition(Vector3 pos)
+	{
+		windPosition = pos;
+		shouldBlowLeft = (pos.x - transform.position.x < 0.0f);
+		texScale = (shouldBlowLeft) ? texScaleLeft : texScaleRight;
+	}
+
+	#endregion
+	
+	
+	#region Public Functions
+
 	//
 	public void GoAway()
 	{
-		this.m_leaving = true;
-		this.GetComponent<Collider>().isTrigger = true;
+		leaving = true;
+		GetComponent<Collider>().isTrigger = true;
 	}
+
+	#endregion
 }

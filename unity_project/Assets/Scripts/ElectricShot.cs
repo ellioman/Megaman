@@ -3,62 +3,50 @@ using System.Collections;
 
 public class ElectricShot : MonoBehaviour
 {
-	// Properties
-	public Vector3 TargetDirection { 
-		get { return m_targetDirection;}
-		set {
-			m_targetDirection = value - transform.position;
-			m_targetDirection.Normalize();
+	#region Variables
+
+	// Public Properties
+	public Vector3 TargetDirection
+	{ 
+		get { return targetDirection; }
+		set 
+		{
+			targetDirection = value - transform.position;
+			targetDirection.Normalize();
 			SetTextureScale();
 		}
 	}
 	
-	// Private Instance Variables
-	private Vector3 m_targetDirection;
-	private float m_lifeSpan = 3f;
-	private float m_damage = 10f;
-	private float m_speed = 150f;
-	private float m_timeStart;
-	private Vector2 m_texScaleRightDown = new Vector2(1.0f, -1.0f);
-	private Vector2 m_texScaleLeftDown = new Vector2(-1.0f, -1.0f);
-	private Vector2 m_texScaleRightUp = new Vector2(1.0f, 1.0f);
-	private Vector2 m_texScaleLeftUp = new Vector2(-1.0f, 1.0f);
+	// Protected Instance Variables
+	protected Vector3 targetDirection;
+	protected float lifeSpan = 3f;
+	protected float damage = 10f;
+	protected float speed = 150f;
+	protected float timeStart;
+	protected Vector2 texScaleRightDown = new Vector2(1.0f, -1.0f);
+	protected Vector2 texScaleLeftDown = new Vector2(-1.0f, -1.0f);
+	protected Vector2 texScaleRightUp = new Vector2(1.0f, 1.0f);
+	protected Vector2 texScaleLeftUp = new Vector2(-1.0f, 1.0f);
 	
-	/**/
-	void SetTextureScale()
+	#endregion
+	
+	
+	#region MonoBehaviour
+
+	/* Use this for initialization */
+	protected void Start ()
 	{
-		// Left?
-		if ( m_targetDirection.x <= 0.0f )
-		{
-			if ( m_targetDirection.y <= 0.0f )
-			{
-				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeftDown);
-			}
-			else 
-			{
-				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeftUp);
-			}
-		}
-		// Right...
-		else
-		{
-			if ( m_targetDirection.y <= 0.0f )
-			{
-				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleRightDown);
-			}
-			else {
-				GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleRightUp);
-			}
-		}
+		timeStart = Time.time;
 	}
 	
-	/**/
-	void InflictDamage( GameObject objectHit )
+	/* Update is called once per frame */
+	protected void Update ()
 	{
-		if ( objectHit.tag == "Player" )
+		GetComponent<Rigidbody>().velocity = targetDirection * speed * Time.deltaTime;
+		
+		if (Time.time - timeStart >= lifeSpan)
 		{
-			objectHit.GetComponent<Player>().TakeDamage( m_damage );
-			transform.parent.gameObject.GetComponent<ElectricRobot>().SetIsShooting( false );
+			transform.parent.gameObject.SendMessage("SetIsShooting", false);
 			Destroy(gameObject);
 		}
 	}
@@ -66,31 +54,60 @@ public class ElectricShot : MonoBehaviour
 	// Called when the Collider other enters the trigger.
 	protected void OnTriggerEnter(Collider other) 
 	{
-		InflictDamage( other.gameObject );
+		InflictDamage(other.gameObject);
 	}
 	
-	/**/
-	void OnCollisionEnter( Collision collision ) 
+	// 
+	protected void OnCollisionEnter(Collision collision) 
 	{
-		InflictDamage( collision.gameObject );
+		InflictDamage(collision.gameObject);
 	}
-	
-	/* Use this for initialization */
-	void Start ()
+
+	#endregion
+
+
+	#region Protected Functions
+
+	// 
+	protected void SetTextureScale()
 	{
-		m_timeStart = Time.time;
-	}
-	
-	/* Update is called once per frame */
-	void Update ()
-	{
-		GetComponent<Rigidbody>().velocity = m_targetDirection * m_speed * Time.deltaTime;
-		
-		if ( Time.time - m_timeStart >= m_lifeSpan )
+		// Left?
+		if (targetDirection.x <= 0.0f)
 		{
-			transform.parent.gameObject.SendMessage("SetIsShooting", false);
+			if (targetDirection.y <= 0.0f)
+			{
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleLeftDown);
+			}
+			else 
+			{
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleLeftUp);
+			}
+		}
+		// Right...
+		else
+		{
+			if (targetDirection.y <= 0.0f)
+			{
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleRightDown);
+			}
+			else
+			{
+				GetComponent<Renderer>().material.SetTextureScale("_MainTex", texScaleRightUp);
+			}
+		}
+	}
+	
+	// 
+	protected void InflictDamage(GameObject objectHit)
+	{
+		if (objectHit.tag == "Player")
+		{
+			GameEngine.Player.TakeDamage(damage);
+			transform.parent.gameObject.GetComponent<ElectricRobot>().SetIsShooting(false);
 			Destroy(gameObject);
 		}
 	}
+
+	#endregion
 }
 

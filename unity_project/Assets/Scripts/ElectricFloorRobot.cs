@@ -3,60 +3,77 @@ using System.Collections;
 
 public class ElectricFloorRobot : MonoBehaviour 
 {
-	// Unity Editor Variables
-	public Rigidbody m_shot;
-	
-	// Private Instance Variables
-	private float m_distanceToStop = 14.0f;
-	private float m_attackDelay = 2.0f;
-	private float m_attackTimer;
+	#region Variables
 
-	/* Use this for initialization */
-	void Start () 
+	// Unity Editor Variables
+	[SerializeField] protected Rigidbody shotPrefab;
+	
+	// Protected Instance Variables
+	protected float distanceToStop = 14.0f;
+	protected float attackDelay = 2.0f;
+	protected float attackTimer;
+
+	#endregion
+
+
+	#region MonoBehaviour
+
+	// Use this for initialization
+	protected void Start () 
 	{
-		m_attackTimer = Time.time;
+		attackTimer = Time.time;
+	}
+
+	// Update is called once per frame
+	protected void Update () 
+	{
+		Vector3 direction = GameEngine.Player.transform.position - transform.position;
+		
+		// Kill this object if the player is too far away
+		if ( direction.magnitude <=  distanceToStop)
+		{
+			Attack();
+		}
+	}
+
+	#endregion
+
+	#region Protected Functions
+
+	// 
+	protected void KillChildren()
+	{
+		// Destroy all the shots...
+		foreach(Transform child in transform)
+		{
+			Destroy( child.gameObject );
+		}
 	}
 	
-	/**/
+	// 
+	protected void Attack()
+	{
+		if ( Time.time - attackTimer >= attackDelay )
+		{
+			attackTimer = Time.time;
+			
+			Vector3 pos = transform.position + Vector3.up * 0.8f + Vector3.right * 0.1f;
+			Rigidbody electricShot = (Rigidbody) Instantiate(shotPrefab, pos, transform.rotation);
+			Physics.IgnoreCollision(electricShot.GetComponent<Collider>(), GetComponent<Collider>());
+			electricShot.GetComponent<ElectricFloorRobotShot>().Attack( GameEngine.Player.transform.position );
+			electricShot.transform.parent = gameObject.transform;
+		}
+	}
+
+	#endregion
+
+	#region Public Functions
+	
+	// 
 	public void Reset()
 	{
 		KillChildren();
 	}
 	
-	/**/
-	void KillChildren()
-	{
-		// Destroy all the shots...
-		foreach(Transform child in transform)
-		{
-		    Destroy( child.gameObject );
-		}
-	}
-	
-	/* */
-	void Attack()
-	{
-		if ( Time.time - m_attackTimer >= m_attackDelay )
-		{
-			m_attackTimer = Time.time;
-			
-			Vector3 pos = transform.position + Vector3.up * 0.8f + Vector3.right * 0.1f;
-			Rigidbody electricShot = (Rigidbody) Instantiate(m_shot, pos, transform.rotation);
-			Physics.IgnoreCollision(electricShot.GetComponent<Collider>(), GetComponent<Collider>());
-			electricShot.GetComponent<ElectricFloorRobotShot>().Attack( Player.Instance.transform.position );
-			electricShot.transform.parent = gameObject.transform;
-		}
-	}
-	
-	/* Update is called once per frame */
-	void Update () 
-	{
-		Vector3 direction = Player.Instance.transform.position - transform.position;
-		
-		// Kill this object if the player is too far away
-		if ( direction.magnitude <=  m_distanceToStop)
-		{
-			Attack();
-		}
-	}
+	#endregion
 }

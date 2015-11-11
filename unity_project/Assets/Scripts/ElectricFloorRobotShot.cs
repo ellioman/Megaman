@@ -3,91 +3,110 @@ using System.Collections;
 
 public class ElectricFloorRobotShot : MonoBehaviour 
 {
-	// Private Instance Variables
-	private int m_texDir = 1;
-	private bool m_keepAttacking = false;
-	private float m_texChangeDelay = 0.1f;
-	private float m_texTimer;
-	private float m_gravity = 11.8f;
-	private float m_jumpAmount = 10.0f;
-	private float m_verticalVelocity;
-	private float m_lifeSpan = 5.0f;
-	private float m_lifeTimer;
-	private Vector3 m_attackPos;
-	private Vector3 m_moveVector;
+	#region Variables
+
+	// Protected Instance Variables
+	protected int texDir = 1;
+	protected bool keepAttacking = false;
+	protected float texChangeDelay = 0.1f;
+	protected float texTimer;
+	protected float gravity = 11.8f;
+	protected float jumpAmount = 10.0f;
+	protected float verticalVelocity;
+	protected float lifeSpan = 5.0f;
+	protected float lifeTimer;
+	protected Vector3 attackPos;
+	protected Vector3 moveVector;
 	
-	/* Use this for initialization */
-	void Start ()
+	#endregion
+	
+	
+	#region MonoBehaviour
+
+	// Use this for initialization
+	protected void Start ()
 	{
-		m_lifeTimer = m_texTimer = Time.time;
+		lifeTimer = texTimer = Time.time;
 	}
 	
-	/**/
-	public void Attack( Vector3 playerPos )
+	// Update is called once per frame
+	protected void Update () 
 	{
-		m_attackPos = playerPos;
-		m_moveVector = (m_attackPos - transform.position);
-		m_moveVector.y = m_jumpAmount;
-		m_verticalVelocity = m_jumpAmount;
-		m_keepAttacking = true;
-	}
-	
-	/**/
-	void OnCollisionEnter( Collision collision ) 
-	{
-		if ( collision.gameObject.tag == "Player" )
+		if (keepAttacking == true)
 		{
-			collision.gameObject.GetComponent<Player>().TakeDamage( 10f );
-			Destroy(gameObject);
-		}
-		
-		if ( collision.transform.position.y < transform.position.y )
-		{
-			m_keepAttacking = false;
-		}
-	}
-	
-	// Called when the Collider other enters the trigger.
-	protected void OnTriggerEnter( Collider collider ) 
-	{
-		if ( collider.tag == "Player" )
-		{
-			collider.gameObject.GetComponent<Player>().TakeDamage( 10f );
-			Destroy(gameObject);
-		}
-	}
-	
-	/**/
-	private void ApplyGravity()
-	{
-		m_moveVector = new Vector3(m_moveVector.x, (m_moveVector.y - m_gravity * Time.deltaTime), m_moveVector.z);
-	}
-	
-	/* Update is called once per frame */
-	void Update () 
-	{
-		if ( m_keepAttacking == true )
-		{
-			m_verticalVelocity = m_moveVector.y;
-			m_moveVector = (m_attackPos - transform.position);
-			m_moveVector.y = m_verticalVelocity;
+			verticalVelocity = moveVector.y;
+			moveVector = (attackPos - transform.position);
+			moveVector.y = verticalVelocity;
 			
 			ApplyGravity();
 			
-			transform.position += m_moveVector * Time.deltaTime;
+			transform.position += moveVector * Time.deltaTime;
 		}
 		
-		if ( Time.time - m_texTimer >= m_texChangeDelay )
+		if (Time.time - texTimer >= texChangeDelay)
 		{
-			m_texTimer = Time.time;
-			m_texDir *= -1;
-			GetComponent<Renderer>().material.SetTextureScale("_MainTex", new Vector2( m_texDir, 1) );
+			texTimer = Time.time;
+			texDir *= -1;
+			GetComponent<Renderer>().material.SetTextureScale("_MainTex", new Vector2(texDir, 1));
 		}
 		
 		// Time to kill the shot?
-		if ( Time.time - m_lifeTimer >= m_lifeSpan )
+		if (Time.time - lifeTimer >= lifeSpan)
 		{
 			Destroy(gameObject);
 		}
 	}
+
+	// Called when the Collider other enters the trigger.
+	protected void OnTriggerEnter(Collider collider) 
+	{
+		if (collider.tag == "Player")
+		{
+			collider.gameObject.GetComponent<Player>().TakeDamage(10f);
+			Destroy(gameObject);
+		}
+	}
+
+	// 
+	protected void OnCollisionEnter(Collision collision) 
+	{
+		if (collision.gameObject.tag == "Player")
+		{
+			collision.gameObject.GetComponent<Player>().TakeDamage(10f);
+			Destroy(gameObject);
+		}
+		
+		if (collision.transform.position.y < transform.position.y)
+		{
+			keepAttacking = false;
+		}
+	}
+	
+	#endregion
+	
+	
+	#region Protected Functions
+	
+	// 
+	protected void ApplyGravity()
+	{
+		moveVector = new Vector3(moveVector.x, (moveVector.y - gravity * Time.deltaTime), moveVector.z);
+	}
+
+	#endregion
+	
+	
+	#region Public Functions
+
+	// 
+	public void Attack(Vector3 playerPos)
+	{
+		attackPos = playerPos;
+		moveVector = (attackPos - transform.position);
+		moveVector.y = jumpAmount;
+		verticalVelocity = jumpAmount;
+		keepAttacking = true;
+	}
+
+	#endregion
 }

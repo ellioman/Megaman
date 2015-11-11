@@ -46,6 +46,8 @@ public class AirmanBoss : MonoBehaviour
 	// Constructor
 	protected void Awake ()
 	{
+		GameEngine.AirMan = this;
+
 		rend = gameObject.GetComponent<Renderer>();
 		Assert.IsNotNull(rend);
 
@@ -91,13 +93,19 @@ public class AirmanBoss : MonoBehaviour
 		}
 	}
 
-
+	// 
 	protected void OnTriggerStay(Collider other) 
 	{
 		if (other.tag == "Player")
 		{
 			other.gameObject.SendMessage("TakeDamage", touchDamage);
 		}
+	}
+
+	// Called when the behaviour becomes disabled or inactive
+	protected void OnDisable()
+	{
+		GameEngine.AirMan = null;
 	}
 
 
@@ -117,8 +125,8 @@ public class AirmanBoss : MonoBehaviour
 		hasBeenIntroduced = true;
 		
 		// Stop the stage theme and play the boss theme
-		SoundManager.Instance.Stop (AirmanLevelSounds.STAGE);
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_MUSIC);
+		GameEngine.SoundManager.Stop (AirmanLevelSounds.STAGE);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_MUSIC);
 		
 		// Stop the player from shooting while healthbar is charging
 		player.CanShoot = false;		
@@ -132,11 +140,8 @@ public class AirmanBoss : MonoBehaviour
 		journeyLength = Vector3.Distance(startingPosition, endPos);
 	}
 
-
-	#endregion
-
 	//
-	void Reset()
+	public void Reset()
 	{
 		if (hasBeenIntroduced == false)
 		{
@@ -170,6 +175,10 @@ public class AirmanBoss : MonoBehaviour
 		
 		gameObject.SetActive (false);
 	}
+
+	#endregion
+
+
 	
 	//
 	protected void CreateDeathParticle(float speed, Vector3 pos, Vector3 vel)
@@ -221,14 +230,14 @@ public class AirmanBoss : MonoBehaviour
 		// Before the wait...
 		rend.enabled = false;
 		col.enabled = false;
-		SoundManager.Instance.Stop(AirmanLevelSounds.BOSS_MUSIC);
-		SoundManager.Instance.Play(AirmanLevelSounds.DEATH);
+		GameEngine.SoundManager.Stop(AirmanLevelSounds.BOSS_MUSIC);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.DEATH);
 		
 		// Start the wait...
 		yield return new WaitForSeconds(3.0f);
 		
 		// After the wait...
-		SoundManager.Instance.Play(AirmanLevelSounds.STAGE_END);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.STAGE_END);
 		
 		// Another wait...
 		yield return new WaitForSeconds(6.5f);
@@ -253,7 +262,7 @@ public class AirmanBoss : MonoBehaviour
 		// Make sure that shots can not kill the boss twice...
 		if (health.CurrentHealth > 0.0f && health.IsHurting == false)
 		{
-			SoundManager.Instance.Play(AirmanLevelSounds.BOSS_HURTING);
+			GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_HURTING);
 			health.ChangeHealth (- dam);
 			hurtingTimer = Time.time;
 			
@@ -283,7 +292,7 @@ public class AirmanBoss : MonoBehaviour
 			// If the health bar is full, make the robot start to fight!
 			else
 			{
-				SoundManager.Instance.Stop(AirmanLevelSounds.HEALTHBAR_FILLING);
+				GameEngine.SoundManager.Stop(AirmanLevelSounds.HEALTHBAR_FILLING);
 				isPlayingBeginSequence = false;
 				isFighting = true;
 				player.CanShoot = true;
@@ -303,7 +312,7 @@ public class AirmanBoss : MonoBehaviour
 			if (fracJourney >= 1.0)
 			{
 				shouldFillHealthBar = true;
-				SoundManager.Instance.Play(AirmanLevelSounds.HEALTHBAR_FILLING);
+				GameEngine.SoundManager.Play(AirmanLevelSounds.HEALTHBAR_FILLING);
 			}
 		}
 	}

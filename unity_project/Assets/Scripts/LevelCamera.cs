@@ -3,7 +3,9 @@ using System.Collections;
 
 public class LevelCamera : MonoBehaviour 
 {
-	// Properties
+	#region Variables
+
+	// Public Properties
 	public Vector3 CameraPosition		{ get{return transform.position;} set{transform.position = value;} }
 	public Vector3 CheckpointPosition 	{ get; set; }
 	public bool CheckpointCanMoveLeft 	{ get; set; }
@@ -18,27 +20,18 @@ public class LevelCamera : MonoBehaviour
 	public bool ShouldStayStill			{ get; set; }
 	
 	// Private Instance Variables
-	private Vector3 m_playerPos;
-	private Vector3 m_deltaPos;
+	private Vector3 playerPos;
+	private Vector3 deltaPos;
+
+	#endregion
+
+
+	#region MonoBehaviour
 	
-	/**/
-	public void Reset()
+	// Use this for initialization
+	protected void Start () 
 	{
-		ShouldStayStill = false;
-		IsTransitioning = false;
-		transform.position = CheckpointPosition;
-		CanMoveLeft = CheckpointCanMoveLeft;
-		CanMoveRight = CheckpointCanMoveRight;
-		CanMoveUp = CheckpointCanMoveUp;
-		CanMoveDown = CheckpointCanMoveDown;		
-		transform.position = CameraPosition;
-	}
-	
-	/* Use this for initialization */
-	void Start () 
-	{
-		Vector3 startPosition = new Vector3( 13.34303f, 11.51588f, -10f);
-//		startPosition.y = -24.2f;
+		Vector3 startPosition = new Vector3(13.34303f, 11.51588f, -10f);
 		transform.position = startPosition; 
 		CheckpointPosition = startPosition;
 		
@@ -55,28 +48,28 @@ public class LevelCamera : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update () 
+	protected void Update () 
 	{
 		// If the camera is transitioning between parts of the scene...
-		if ( IsTransitioning == true || ShouldStayStill == true )
+		if (IsTransitioning == true || ShouldStayStill == true)
 		{
 			return;
 		}
 		
 		// Make the camera follow the player...
-		m_playerPos = Player.Instance.transform.position;
-		m_deltaPos = m_playerPos - transform.position;
+		playerPos = GameEngine.Player.transform.position;
+		deltaPos = playerPos - transform.position;
 		
 		// Check the x pos 
-		if ( (m_deltaPos.x < 0.0f && CanMoveLeft) || (m_deltaPos.x > 0.0f && CanMoveRight) ) 		
+		if ((deltaPos.x < 0.0f && CanMoveLeft) || (deltaPos.x > 0.0f && CanMoveRight)) 		
 		{
-			transform.position = new Vector3( m_playerPos.x, transform.position.y, transform.position.z );
+			transform.position = new Vector3(playerPos.x, transform.position.y, transform.position.z);
 		}
 		
 		// Check the y pos 
-		if ( (m_deltaPos.y < 0.0f && CanMoveDown) || (m_deltaPos.y > 0.0f && CanMoveUp)) 		
+		if ((deltaPos.y < 0.0f && CanMoveDown) || (deltaPos.y > 0.0f && CanMoveUp)) 		
 		{
-			transform.position = new Vector3( transform.position.x, m_playerPos.y, transform.position.z );
+			transform.position = new Vector3(transform.position.x, playerPos.y, transform.position.z);
 		}
 		
 		// Make the level restart if the user presses escape...
@@ -85,4 +78,24 @@ public class LevelCamera : MonoBehaviour
     		Application.LoadLevel (0);
   		} 
 	}
+
+	#endregion
+
+
+	#region Public Functions
+
+	// 
+	public void Reset()
+	{
+		ShouldStayStill = false;
+		IsTransitioning = false;
+		transform.position = CheckpointPosition;
+		CanMoveLeft = CheckpointCanMoveLeft;
+		CanMoveRight = CheckpointCanMoveRight;
+		CanMoveUp = CheckpointCanMoveUp;
+		CanMoveDown = CheckpointCanMoveDown;		
+		transform.position = CameraPosition;
+	}
+
+	#endregion
 }

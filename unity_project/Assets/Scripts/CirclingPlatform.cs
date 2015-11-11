@@ -1,79 +1,86 @@
 using UnityEngine;
 using System.Collections;
 
-public class CirclingPlatform : MonoBehaviour {
+public class CirclingPlatform : MonoBehaviour
+{
+	#region Variables
+
 	// Unity Editor Variables
-	public bool m_clockWise;		// Should the platform move clockwise?
-	public float m_beginningAngle;	// At what angle should it start with?
-	public float m_circleWidth; 	// What is the width of the ellipse/circle?
-	public float m_circleHeight; 	// What is the height of the ellipse/circle?
-  	public float m_speedInSeconds; 	// How long should it take to move in a full circle?
+	public bool clockWise;		// Should the platform move clockwise?
+	public float beginningAngle;	// At what angle should it start with?
+	public float circleWidth; 	// What is the width of the ellipse/circle?
+	public float circleHeight; 	// What is the height of the ellipse/circle?
+	public float speedInSeconds; 	// How long should it take to move in a full circle?
 	
-	// Properties
+	// Public Properties
 	public bool ShouldAnimate { get; set; }
 	
 	// Private Instance Variables
-	private Vector3 m_currentPos;
-	private float m_speedScale;
-	private Vector3 m_circleCenter;
-	private float m_angle = 0.0f;
-	private float m_fullCircle = (2.0f*Mathf.PI);
-	private float m_fullCircleInDeg = 360.0f;
-	private float m_convertFromDeg;
-	
-	/* Use this for initialization */
-	void Start () 
+	private Vector3 currentPos;
+	private float speedScale;
+	private Vector3 circleCenter;
+	private float angle = 0.0f;
+	private float fullCircle = (2.0f*Mathf.PI);
+	private float fullCircleInDeg = 360.0f;
+	private float convertFromDeg;
+
+	#endregion
+
+	#region MonoBehaviour
+
+	// Use this for initialization
+	void Start() 
 	{
-		m_currentPos = transform.position;
-		m_convertFromDeg = (m_fullCircle / m_fullCircleInDeg);
-		m_circleCenter = transform.position;
+		currentPos = transform.position;
+		convertFromDeg = (fullCircle / fullCircleInDeg);
+		circleCenter = transform.position;
 		ShouldAnimate = false;
 	}
 	
 	// Called when the Collider other enters the trigger.
-	protected void OnTriggerEnter( Collider other )
+	protected void OnTriggerEnter( Collider other)
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			Player.Instance.transform.parent =  gameObject.transform;
+			GameEngine.Player.transform.parent =  gameObject.transform;
 		}
 	}
 	
-	/**/
-	void OnTriggerExit( Collider other )
+	// 
+	protected void OnTriggerExit( Collider other)
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			Player.Instance.transform.parent = null;
+			GameEngine.Player.transform.parent = null;
 		}
 	}
 	
-	/* Update is called once per frame */
-	void Update () {
-		if ( m_speedInSeconds <= 0 )
+	// Update is called once per frame
+	protected void Update()
+	{
+		if (speedInSeconds <= 0)
 		{
 			return;
 		}
-		else if ( ShouldAnimate == true )
+		else if (ShouldAnimate == true)
 		{
-			m_speedScale = m_fullCircle / m_speedInSeconds;
+			speedScale = fullCircle / speedInSeconds;
 			
-			if ( m_clockWise == true ) {
-				m_angle = m_convertFromDeg * m_beginningAngle + (Time.time * m_speedScale) % m_fullCircle;
+			if (clockWise == true)
+			{
+				angle = convertFromDeg * beginningAngle + (Time.time * speedScale) % fullCircle;
 			}
-			else if ( m_clockWise == false ) {
-				m_angle = m_fullCircle - m_convertFromDeg * m_beginningAngle + (Time.time * m_speedScale) % m_fullCircle;
+			else if (clockWise == false)
+			{
+				angle = fullCircle - convertFromDeg * beginningAngle + (Time.time * speedScale) % fullCircle;
 			}
-			
-			// Circle approach
-//			currentPos.x = CircleCenter.x + Mathf.Sin(angle) * radius;
-//			currentPos.y = CircleCenter.y + Mathf.Cos(angle) * radius;
-			
 			// Ellipse approach
-			m_currentPos.x = m_circleCenter.x + (m_circleWidth/2.0f) * Mathf.Cos(m_angle);
-			m_currentPos.y = m_circleCenter.y + (m_circleHeight/2.0f) * Mathf.Sin(m_angle);
+			currentPos.x = circleCenter.x + (circleWidth/2.0f) * Mathf.Cos(angle);
+			currentPos.y = circleCenter.y + (circleHeight/2.0f) * Mathf.Sin(angle);
 			
-			transform.position = m_currentPos;
+			transform.position = currentPos;
 		}
 	}
+
+	#endregion
 }

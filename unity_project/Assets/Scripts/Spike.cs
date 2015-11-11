@@ -3,27 +3,42 @@ using System.Collections;
 
 public class Spike : MonoBehaviour 
 {
-	// Private Instance Variables
-	private float m_damage = 10.0f;
+	#region Variables
+
+	// Protected Instance Variables
+	protected const float DAMAGE_AMOUNT = 10.0f;
+
+	#endregion
+
+
+	#region MonoBehaviour
 	
-	/**/
-	void InflictDamage( GameObject objectHit )
+
+	// 
+	protected void OnCollisionStay(Collision collision) 
 	{
-		if ( objectHit.tag == "Player" )
+		InflictDamage(collision.gameObject);
+	}
+	
+	// 
+	protected void OnTriggerStay(Collider other) 
+	{
+		InflictDamage(other.gameObject);
+	}
+
+	#endregion
+
+
+	#region Protected Functions
+
+	// 
+	protected void InflictDamage(GameObject objectHit)
+	{
+		if (objectHit.tag == "Player")
 		{
-			Player.Instance.TakeDamage ( m_damage );
+			GameEngine.Player.TakeDamage (DAMAGE_AMOUNT);
 		}
 	}
-	
-	/* */
-	void OnCollisionStay( Collision collision ) 
-	{
-		InflictDamage( collision.gameObject );
-	}
-	
-	/* */
-	void OnTriggerStay(Collider other) 
-	{
-		InflictDamage( other.gameObject );
-	}
+
+	#endregion
 }

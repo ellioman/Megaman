@@ -3,55 +3,64 @@ using System.Collections;
 
 public class LittleBird : MonoBehaviour 
 {
-	// Private Instance Variables
-	private bool m_attacking = false;
-	private Vector3 m_direction;
-	private float m_speed = 7.5f;
-	private float m_lifeSpan = 10.0f;
-	private float m_lifeTimer;
-	private float m_damage = 10.0f;
-	
-	/**/
-	public void Attack( bool goLeft, float birdSpeed )
-	{
-		m_attacking = true;
-		m_direction = (goLeft == true) ? Vector3.left + Vector3.up * 0.15f : Vector3.right + Vector3.up * 0.15f;
-		m_speed = birdSpeed;
-		m_lifeTimer = Time.time;
-	}
-	
-	/**/
-	public void TakeDamage( float dam )
-	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_HURTING);
-		Destroy ( gameObject );
-	}
+	#region Variables
+
+	// Protected Instance Variables
+	protected bool attacking = false;
+	protected Vector3 direction;
+	protected float speed = 7.5f;
+	protected float lifeSpan = 10.0f;
+	protected float lifeTimer;
+	protected float damage = 10.0f;
+
+	#endregion
+
+
+	#region MonoBehaviour
 	
 	// Called when the Collider other enters the trigger.
-	protected void OnTriggerEnter( Collider other )
+	protected void OnTriggerEnter(Collider other)
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			Player.Instance.TakeDamage( m_damage );
+			GameEngine.Player.TakeDamage(damage);
 		}
 	}
 	
-	/* Use this for initialization */
-	void Start () {
-		
-	}
-	
-	/* */
-	void Update () 
+	// 
+	protected void Update () 
 	{
-		if ( m_attacking == true )
+		if (attacking == true)
 		{
-			transform.position += (m_direction * m_speed * Time.deltaTime);
+			transform.position += (direction * speed * Time.deltaTime);
 			
-			if ( Time.time - m_lifeTimer >= m_lifeSpan )
+			if (Time.time - lifeTimer >= lifeSpan)
 			{
-				Destroy ( gameObject );	
+				Destroy (gameObject);	
 			}
 		}
 	}
+
+	#endregion
+
+
+	#region Public Functions
+
+	// 
+	public void Attack(bool goLeft, float birdSpeed)
+	{
+		attacking = true;
+		direction = (goLeft == true) ? Vector3.left + Vector3.up * 0.15f : Vector3.right + Vector3.up * 0.15f;
+		speed = birdSpeed;
+		lifeTimer = Time.time;
+	}
+	
+	// 
+	public void TakeDamage(float dam)
+	{
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_HURTING);
+		Destroy (gameObject);
+	}
+
+	#endregion
 }

@@ -1,101 +1,112 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections;
 
 public class CameraTrigger : MonoBehaviour
 {
+	#region Variables
+
 	// Unity Editor Variables
-	public bool m_bossDoorTrigger;
-	public BossDoor m_door;
-	public bool m_onEnterCanMoveLeft;
-	public bool m_onExitCanMoveLeft;
-	public bool m_onEnterCanMoveRight;
-	public bool m_onExitCanMoveRight;
-	public bool m_onEnterCanMoveUp;
-	public bool m_onExitCanMoveUp;
-	public bool m_onEnterCanMoveDown;
-	public bool m_onExitCanMoveDown;
-	public bool m_shouldMoveCamera;
-	public float m_transitionDuration;
-	public Vector3 m_freezeEndPosition;
+	[SerializeField] protected bool isABossDoorTrigger;
+	[SerializeField] protected BossDoor bossDoor;
+	[SerializeField] protected bool onEnterCanMoveLeft;
+	[SerializeField] protected bool onExitCanMoveLeft;
+	[SerializeField] protected bool onEnterCanMoveRight;
+	[SerializeField] protected bool onExitCanMoveRight;
+	[SerializeField] protected bool onEnterCanMoveUp;
+	[SerializeField] protected bool onExitCanMoveUp;
+	[SerializeField] protected bool onEnterCanMoveDown;
+	[SerializeField] protected bool onExitCanMoveDown;
+	[SerializeField] protected bool shouldMoveCamera;
+	[SerializeField] protected float transitionDuration;
+	[SerializeField] protected Vector3 freezeEndPosition;
 	
-	// Private Instance Variables
-	private LevelCamera m_camera;
-	private float m_transitionStatus = 0.0f;
-	private bool m_isTransitioning = false;
-	private Vector3 m_startPosition;
-	private float m_startTime;
+	// Protected Instance Variables
+	protected LevelCamera levelCamera;
+	protected float transitionStatus = 0.0f;
+	protected bool isTransitioning = false;
+	protected Vector3 startPosition;
+	protected float startTime;
+
+	#endregion
+
+
+	#region MonoBehaviour
+
+	// Constructor
+	protected void Awake()
+	{
+		levelCamera = FindObjectOfType<LevelCamera>();
+		Assert.IsNotNull(levelCamera);
+	}
 	
+	// Update is called once per frame
+	protected void Update ()
+	{
+		if (isTransitioning == true)
+		{
+			transitionStatus = (Time.time - startTime) / transitionDuration;
+			levelCamera.CameraPosition = Vector3.Lerp(startPosition, freezeEndPosition, transitionStatus);
+			
+			if (transitionStatus  >= 1.0)
+			{
+				isTransitioning = false;
+				levelCamera.IsTransitioning = false;
+				levelCamera.CameraPosition = freezeEndPosition;
+				levelCamera.CanMoveLeft = onExitCanMoveLeft;
+				levelCamera.CanMoveRight = onExitCanMoveRight;
+				levelCamera.CanMoveUp = onExitCanMoveUp;
+				levelCamera.CanMoveDown = onExitCanMoveDown;
+			}
+		}
+	}
+
 	// Called when the Collider other enters the trigger.
 	protected void OnTriggerEnter(Collider other) 
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			m_camera.CanMoveLeft = m_onEnterCanMoveLeft;
-			m_camera.CanMoveRight = m_onEnterCanMoveRight;
-			m_camera.CanMoveUp = m_onEnterCanMoveUp;
-			m_camera.CanMoveDown = m_onEnterCanMoveDown;
+			levelCamera.CanMoveLeft = onEnterCanMoveLeft;
+			levelCamera.CanMoveRight = onEnterCanMoveRight;
+			levelCamera.CanMoveUp = onEnterCanMoveUp;
+			levelCamera.CanMoveDown = onEnterCanMoveDown;
 			
-			if ( m_bossDoorTrigger )
+			if (isABossDoorTrigger)
 			{
-				m_door.SendMessage("openDoor");
-				Player.Instance.IsFrozen = true;
-				m_camera.IsTransitioning = true;
+				bossDoor.OpenDoor();
+				GameEngine.Player.IsFrozen = true;
+				levelCamera.IsTransitioning = true;
 			}
 			
-			if ( m_shouldMoveCamera == true )
+			if (shouldMoveCamera == true)
 			{
-				m_startPosition = m_camera.CameraPosition;
-				m_isTransitioning = true;
-				m_startTime = Time.time;
-				m_camera.IsTransitioning = true;
+				startPosition = levelCamera.CameraPosition;
+				isTransitioning = true;
+				startTime = Time.time;
+				levelCamera.IsTransitioning = true;
 			}
 		}
     }
 	
-	/**/
-	void OnTriggerExit(Collider other) 
+	// 
+	protected void OnTriggerExit(Collider other) 
 	{
-		if ( other.tag == "Player" )
+		if (other.tag == "Player")
 		{
-			m_camera.CanMoveLeft = m_onExitCanMoveLeft;
-			m_camera.CanMoveRight = m_onExitCanMoveRight;
-			m_camera.CanMoveUp = m_onExitCanMoveUp;
-			m_camera.CanMoveDown = m_onExitCanMoveDown;
+			levelCamera.CanMoveLeft = onExitCanMoveLeft;
+			levelCamera.CanMoveRight = onExitCanMoveRight;
+			levelCamera.CanMoveUp = onExitCanMoveUp;
+			levelCamera.CanMoveDown = onExitCanMoveDown;
 			
-			if ( m_bossDoorTrigger )
+			if (isABossDoorTrigger)
 			{
-				Player.Instance.IsFrozen = false;
-				m_door.SendMessage("closeDoor");
+				GameEngine.Player.IsFrozen = false;
+				bossDoor.CloseDoor();
 				GetComponent<Collider>().enabled = false;
 			}
 		}
     }
 	
-	/**/
-	void Awake()
-	{
-		m_camera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<LevelCamera>();
-	}
-	
-	/* Update is called once per frame */
-	void Update ()
-	{
-		if ( m_isTransitioning == true )
-		{
-			m_transitionStatus = (Time.time - m_startTime) / m_transitionDuration;
-			m_camera.CameraPosition = Vector3.Lerp(m_startPosition, m_freezeEndPosition, m_transitionStatus );
-			
-			if ( m_transitionStatus  >= 1.0 )
-			{
-				m_isTransitioning = false;
-				m_camera.IsTransitioning = false;
-				m_camera.CameraPosition = m_freezeEndPosition;
-				m_camera.CanMoveLeft = m_onExitCanMoveLeft;
-				m_camera.CanMoveRight = m_onExitCanMoveRight;
-				m_camera.CanMoveUp = m_onExitCanMoveUp;
-				m_camera.CanMoveDown = m_onExitCanMoveDown;
-			}
-		}
-	}
+	#endregion
 }
 

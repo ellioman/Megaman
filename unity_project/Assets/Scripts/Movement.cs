@@ -4,127 +4,131 @@ using System.Collections;
 [RequireComponent (typeof (CharacterController))]
 public class Movement : MonoBehaviour
 {
+	#region Variables
+
 	// Properties
-	public bool IsTurningLeft			{ get; private set; }
-	public bool IsJumping 				{ get; private set; }
-	public bool IsWalking				{ get; private set; }
+	public bool IsTurningLeft			{ get; protected set; }
+	public bool IsJumping 				{ get; protected set; }
+	public bool IsWalking				{ get; protected set; }
 	public bool IsHurting				{ get; set; }
 	public bool IsFrozen 				{ get; set; }
 	public bool IsExternalForceActive 	{ get; set; }
 	public Vector3 ExternalForce 		{ get; set; }
 	public Vector3 CheckPointPosition 	{ get; set; }
 	
-	// Private Instance Variables
-	private CharacterController m_charController;
-	private bool m_cheating = false;
-	private float m_gravity = 40f;	 			// Downward force
-	private float m_terminalVelocity = 20f;	// Max downward speed
-	private float m_jumpSpeed = 20f;			// Upward speed
-	private float m_moveSpeed = 10f;			// Left/Right speed
-	private float m_verticalVelocity;
-	private float m_hurtingForce = 2.0f;
-	private Vector3 m_moveVector;
-	private Vector3 m_startPosition = new Vector3( 13.34303f, 11.51588f, 0f);
+	// Protected Instance Variables
+	protected CharacterController charController;
+	protected bool cheating = false;
+	protected float gravity = 40f;	 			// Downward force
+	protected float terminalVelocity = 20f;	// Max downward speed
+	protected float jumpSpeed = 20f;			// Upward speed
+	protected float moveSpeed = 10f;			// Left/Right speed
+	protected float verticalVelocity;
+	protected float hurtingForce = 2.0f;
+	protected Vector3 moveVector = Vector3.zero;
+	protected Vector3 startPosition = new Vector3(13.34303f, 11.51588f, 0f);
+
+	#endregion
 	
-	/* Use this for initialization */
-	private void Awake () {
-		m_charController = (CharacterController) gameObject.GetComponent("CharacterController");
+	
+	#region MonoBehaviour
+
+	// Use this for initialization
+	protected void Awake()
+	{
+		charController = (CharacterController) gameObject.GetComponent("CharacterController");
 	}
 	
-	/* Use this for initialization */
-	void Start ()
+	// Use this for initialization
+	protected void Start ()
 	{
 		IsHurting = false;
-		transform.position = CheckPointPosition = m_startPosition;
+		transform.position = CheckPointPosition = startPosition;
 	}
+
+	#endregion
 	
-	/**/
-	public void Reset()
-	{
-		IsFrozen = false;
-		IsHurting = false;
-		transform.position = CheckPointPosition;
-	}
 	
-	/**/
-	private void ApplyGravity()
+	#region Protected Functions
+
+	//
+	protected void ApplyGravity()
 	{
-		if(m_moveVector.y > -m_terminalVelocity)
+		if (moveVector.y > -terminalVelocity)
 		{
-			m_moveVector = new Vector3(m_moveVector.x, (m_moveVector.y - m_gravity * Time.deltaTime), m_moveVector.z);
+			moveVector = new Vector3(moveVector.x, (moveVector.y - gravity * Time.deltaTime), moveVector.z);
 		}
 		
-		if( m_charController.isGrounded && m_moveVector.y < -1)
+		if (charController.isGrounded && moveVector.y < -1)
 		{
 			IsJumping = false;
-			m_moveVector = new Vector3(m_moveVector.x, (-1), m_moveVector.z);
+			moveVector = new Vector3(moveVector.x, (-1), moveVector.z);
 		}
 	}
 	
-	/**/
-	private void ProcessExternalForces()
+	//
+	protected void ProcessExternalForces()
 	{
 		// 
-		if ( IsExternalForceActive == true )
+		if (IsExternalForceActive == true)
 		{
-			m_moveVector += ExternalForce * Time.deltaTime;
+			moveVector += ExternalForce * Time.deltaTime;
 		}
 	}
 	
-	/**/
-	private void ProcessMovement()
+	//
+	protected void ProcessMovement()
 	{
 		//transform moveVector into world-space relative to character rotation
-		m_moveVector = transform.TransformDirection( m_moveVector );
+		moveVector = transform.TransformDirection(moveVector);
 		
 		//normalize moveVector if magnitude > 1
-		if( m_moveVector.magnitude > 1 )
+		if (moveVector.magnitude > 1)
 		{
-			m_moveVector = Vector3.Normalize(m_moveVector);
+			moveVector = Vector3.Normalize(moveVector);
 		}
 		
 		//multiply moveVector by moveSpeed
-		m_moveVector *= m_moveSpeed;
+		moveVector *= moveSpeed;
 		
 		//
 		ProcessExternalForces();
 		
 		// 
-		if ( IsHurting == true )
+		if (IsHurting == true)
 		{
-			m_moveVector += ( ((IsTurningLeft == true ) ? Vector3.right : -Vector3.right) * m_hurtingForce);
+			moveVector += (((IsTurningLeft == true) ? Vector3.right : -Vector3.right) * hurtingForce);
 		}
 		
 		//reapply vertical velocity to moveVector.y
-		m_moveVector = new Vector3(m_moveVector.x, m_verticalVelocity, 0.0f);
+		moveVector = new Vector3(moveVector.x, verticalVelocity, 0.0f);
 		
 		//apply gravity
 		ApplyGravity();
 		
 		//move character in world-space
-		m_charController.Move(m_moveVector * Time.deltaTime);
+		charController.Move(moveVector * Time.deltaTime);
 	}
-	
-	
-	/**/
-	private void CheckMovement()
+
+	//
+	protected void CheckMovement()
 	{
 		// Horizontal movement...
 		float deadZone = 0.01f;
-		m_verticalVelocity = m_moveVector.y;
-		m_moveVector = Vector3.zero;
+		verticalVelocity = moveVector.y;
+		moveVector = Vector3.zero;
 		
-		if( Input.GetAxis("Horizontal") > deadZone )
+		if (Input.GetAxis("Horizontal") > deadZone)
 		{
 			IsWalking = true;
 			IsTurningLeft = false;
-			m_moveVector += new Vector3(Input.GetAxis("Horizontal"),0,0);
+			moveVector += new Vector3(Input.GetAxis("Horizontal"),0,0);
 		}
-		else if ( Input.GetAxis("Horizontal") < -deadZone )
+		else if (Input.GetAxis("Horizontal") < -deadZone)
 		{
 			IsWalking = true;
 			IsTurningLeft = true;
-			m_moveVector += new Vector3(Input.GetAxis("Horizontal"),0,0);
+			moveVector += new Vector3(Input.GetAxis("Horizontal"),0,0);
 		}
 		else 
 		{
@@ -132,33 +136,43 @@ public class Movement : MonoBehaviour
 		}
 		
 		// Vertical movement...
-		if( Input.GetAxis("Vertical") > 0.0f )
+		if (Input.GetAxis("Vertical") > 0.0f)
 		{
-			if( m_charController.isGrounded )
+			if (charController.isGrounded)
 			{
 				IsJumping = true;
-				m_verticalVelocity = m_jumpSpeed;
+				verticalVelocity = jumpSpeed;
 			}
 		}
+
 		// If there is a collision above...
-		if ( (m_charController.collisionFlags & CollisionFlags.Above) != 0 )
+		if ((charController.collisionFlags & CollisionFlags.Above) != 0)
 		{
-			m_verticalVelocity = -5.0f;
+			verticalVelocity = -5.0f;
 		}
 	}
+
+	#endregion
 	
-	/**/
+	
+	#region Public Functions
+	
+	//
+	public void Reset()
+	{
+		IsFrozen = false;
+		IsHurting = false;
+		transform.position = CheckPointPosition;
+	}
+
+	//
 	public void HandleMovement()
 	{
-		if ( m_cheating == true )
+		if (IsFrozen == true)
 		{
-			CalculateCheatMovements();
-		}
-		else if ( IsFrozen == true )
-		{
-			m_moveVector = Vector3.zero;
+			moveVector = Vector3.zero;
 			ProcessExternalForces();
-			m_charController.Move(m_moveVector * Time.deltaTime);
+			charController.Move(moveVector * Time.deltaTime);
 		}
 		else
 		{
@@ -166,68 +180,7 @@ public class Movement : MonoBehaviour
 			ProcessMovement();
 		}
 	}
-	
-	/* Move freely inside the stage ...*/
-	void CalculateCheatMovements() 
-	{
-		// TODO: Fix this code
-//		rigidbody.isKinematic = true;
-//		Physics.gravity = new Vector3(0.0f, 0.0f, 0.0f);
-//		Vector3 pos = transform.position;
-//		float h_value = Input.GetAxis ("Horizontal");
-//		float d = 20.0f;
-//		if (h_value > 0.0) 
-//		{
-//			pos = pos + Vector3.right * Time.deltaTime * walkSpeed / d;
-//			renderer.material.SetTextureScale("_MainTex", new Vector2(texScaleRight.x, texScaleRight.y));
-//		}
-//		else if (h_value < 0.0) 
-//		{
-//			pos = pos + Vector3.left * Time.deltaTime * walkSpeed / d;
-//			renderer.material.SetTextureScale("_MainTex", new Vector2(texScaleLeft.x, texScaleLeft.y));
-//		}
-//		
-//		float v_value = Input.GetAxis ("Vertical");
-//		if (v_value > 0.0) 
-//		{
-//			pos = pos + Vector3.up * Time.deltaTime * walkSpeed / d;
-//		}
-//		else if (v_value < 0.0) 
-//		{
-//			pos = pos + Vector3.down * Time.deltaTime * walkSpeed / d;
-//		}
-//		
-//		transform.position = pos;
-	}
-	
-//	// Update is called once per frame
-//	void Update ()
-//	{
-////		 CharacterController controller = GetComponent<CharacterController>();
-////        if (controller.collisionFlags == CollisionFlags.None)
-////            print("Free floating!");
-////        
-////		if ((controller.collisionFlags & CollisionFlags.Sides) != 0)
-////            print("Touching sides!");
-////        
-////        if (controller.collisionFlags == CollisionFlags.Sides)
-////            print("Only touching sides, nothing else!");
-////        
-////		if ((controller.collisionFlags & CollisionFlags.Above) != 0)
-////            print("touched the ceiling");
-////        
-////        if (controller.collisionFlags == CollisionFlags.Above)
-////            print("Only touching Ceiling, nothing else!");
-////        
-////		if ((controller.collisionFlags & CollisionFlags.Below) != 0)
-////            print("Touching ground");
-////        
-////        if (controller.collisionFlags == CollisionFlags.Below)
-////            print("Only touching ground, nothing else!");
-//		
-//		checkMovement();
-//		HandleActionInput();
-//		processMovement();
-//	}
+
+	#endregion
 }
 

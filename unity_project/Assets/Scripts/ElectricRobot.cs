@@ -1,155 +1,65 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections;
 using System.Collections.Generic;
 
 public class ElectricRobot : MonoBehaviour 
 {
-	// Unity Editor Variables
-	public Rigidbody m_electricShot;
-	public List<Material> m_materials;
-	
-	// Private Instance Variables
-	private CirclingPlatform platform;
-	private BoxCollider m_robotCollider;
-	private bool m_isShooting = false;
-	private bool m_isDead = false;
-	private int m_health = 30;
-	private int m_currentHealth;
-	private int m_damage = 10;
-	private int m_texIndex = 0;
-	private float m_texChangeInterval = 0.1f;
-	private float m_distanceToStop = 32.0f;
-	private float m_shootingRangeDiameter = 10f;
-	private float m_shootAgainDelay = 2f;
-	private float m_shootingTimer;
-	private Vector2 m_texScale;
-	private Vector2 m_texScaleRight = new Vector2(1.0f, -1.0f);
-	private Vector2 m_texScaleLeft = new Vector2(-1.0f, -1.0f);
-	private Vector3 m_turningLeftColliderPos = new Vector3(0.2f, -0.8f, 0f );
-	private Vector3 m_turningRightColliderPos = new Vector3(-0.2f, -0.8f, 0f );
-	
-	/**/
-	public void SetIsShooting( bool status )
-	{
-		m_isShooting = status;
-	}
-	
-	/**/
-	public void Reset()
-	{
-		m_isDead = false;
-		GetComponent<Collider>().enabled = true;
-		m_currentHealth = m_health;
-	}
-	
-	/**/
-	void KillRobot()
-	{
-		m_isDead = true;
-		GetComponent<Collider>().enabled = false;
-	}
-	
-	/**/
-	void OnTriggerStay(Collider other) 
-	{
-		if ( other.tag == "Player" )
-		{
-			other.gameObject.SendMessage("TakeDamage", m_damage );
-		}
-	}
-	
-	/* Make the robot take damage */
-	void TakeDamage( int damageTaken )
-	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_HURTING);
-		m_currentHealth -= damageTaken;
-		if ( m_currentHealth <= 0 )
-		{
-			KillRobot();
-		}
-	}
-	
-	/* Use this for initialization */
-	void Start ()
-	{
-		platform = gameObject.transform.parent.GetComponent<CirclingPlatform>();
-		m_robotCollider = (BoxCollider) transform.parent.FindChild("PlatformBoxCollider").gameObject.GetComponent<Collider>();
-		m_texScale = m_texScaleLeft;
-		m_currentHealth = m_health;
-	}
-		
-	/**/
-	void AssignTexture()
-	{
-		m_texIndex = (int) (Time.time / m_texChangeInterval);
-		
-		// Make the robot always face the player...
-		bool playerOnLeftSide = (Player.Instance.transform.position.x - transform.position.x < -1.0f);
-		
-		// If the robot is dead
-		if ( m_isDead == true )
-		{
-			// display the platform textures...
-			GetComponent<Renderer>().material = m_materials[(m_texIndex % 2) + 6 ];
-			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScaleLeft);
-			m_robotCollider.center = m_turningLeftColliderPos;
-		}
-		
-		// If the robot is shooting...
-		else if ( m_isShooting == true )
-		{
-			GetComponent<Renderer>().material = m_materials[(m_texIndex % 2) + 4 ];
-			m_texScale = ( playerOnLeftSide == true) ? m_texScaleLeft : m_texScaleRight;
-			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
-			m_robotCollider.center = (playerOnLeftSide == true) ? m_turningLeftColliderPos : m_turningRightColliderPos;
-		}
-		else
-		{
-			// Assign the material
-			GetComponent<Renderer>().material = m_materials[m_texIndex % 4];
-			m_texScale = ( playerOnLeftSide == true) ? m_texScaleLeft : m_texScaleRight;
-			GetComponent<Renderer>().material.SetTextureScale("_MainTex", m_texScale);
-			m_robotCollider.center = (playerOnLeftSide == true) ? m_turningLeftColliderPos : m_turningRightColliderPos;
-		}
-	}
-	
-	/* Shoot an electric arrow towards the player */	
-	void Shoot()
-	{
-		m_isShooting = true;
-		m_shootingTimer = Time.time;
-		
-		Rigidbody shot = (Rigidbody) Instantiate(m_electricShot, transform.position, transform.rotation);
-		shot.transform.parent = gameObject.transform;
-		Physics.IgnoreCollision(shot.GetComponent<Collider>(), GetComponent<Collider>());
+	#region Variables
 
-		shot.GetComponent<ElectricShot>().TargetDirection = Player.Instance.transform.position;
-	}
-	
-	/**/
-	void CheckIfRobotCanShoot()
+	// Unity Editor Variables
+	[SerializeField] protected Rigidbody electricShot;
+	[SerializeField] protected CirclingPlatform platform;
+	[SerializeField] protected BoxCollider robotCollider;
+	[SerializeField] protected List<Material> textureMaterials;
+
+	// Protected Instance Variables
+	protected int health = 30;
+	protected int currentHealth;
+	protected int damage = 10;
+	protected int texIndex = 0;
+	protected bool isShooting = false;
+	protected bool isDead = false;
+	protected float texChangeInterval = 0.1f;
+	protected float distanceToStop = 32.0f;
+	protected float shootingRangeDiameter = 10f;
+	protected float shootAgainDelay = 2f;
+	protected float shootingTimer;
+	protected Vector2 texScale;
+	protected Vector2 texScaleRight = new Vector2(1.0f, -1.0f);
+	protected Vector2 texScaleLeft = new Vector2(-1.0f, -1.0f);
+	protected Vector3 turningLeftColliderPos = new Vector3(0.2f, -0.8f, 0f);
+	protected Vector3 turningRightColliderPos = new Vector3(-0.2f, -0.8f, 0f);
+	protected Collider col = null;
+	protected Renderer rend = null;
+
+	#endregion
+
+
+	#region MonoBehaviour
+
+	// Constructor
+	protected void Awake()
 	{
-		// If the robot is alive, check if he is in range to shoot the player
-		if ( m_isDead == false )
-		{
-			// If the robot is in shooting range...
-			float distanceToPlayer = (Player.Instance.transform.position - transform.position).magnitude;
-			if ( distanceToPlayer < m_shootingRangeDiameter )
-			{
-				// If the robot is ready to shoot...
-				if ( m_isShooting == false && Time.time - m_shootingTimer >= m_shootAgainDelay )
-				{
-					Shoot ();
-				}
-			}
-		}
+		col = GetComponent<Collider>();
+		Assert.IsNotNull(col);
+
+		rend = GetComponent<Renderer>();
+		Assert.IsNotNull(rend);
 	}
-	
-	/* Update is called once per frame */
-	void Update () 
+
+	// Use this for initialization 
+	protected void Start()
+	{
+		texScale = texScaleLeft;
+		currentHealth = health;
+	}
+
+	// Update is called once per frame 
+	protected void Update() 
 	{
 		// Stop fighting if the player is too far away
-		if ( (Player.Instance.transform.transform.position - transform.position).magnitude >= m_distanceToStop )
+		if ((GameEngine.Player.transform.transform.position - transform.position).magnitude >= distanceToStop)
 		{
 			platform.ShouldAnimate = false;
 		}
@@ -164,4 +74,128 @@ public class ElectricRobot : MonoBehaviour
 			AssignTexture();
 		}
 	}	
+
+	#endregion
+
+	
+	#region Protected Functions
+
+	// 
+	protected void KillRobot()
+	{
+		isDead = true;
+		col.enabled = false;
+	}
+	
+	// 
+	protected void OnTriggerStay(Collider other) 
+	{
+		if (other.tag == "Player")
+		{
+			GameEngine.Player.TakeDamage(damage);
+		}
+	}
+	
+	//  Make the robot take damage 
+	protected void TakeDamage(int damageTaken)
+	{
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_HURTING);
+		currentHealth -= damageTaken;
+		if (currentHealth <= 0)
+		{
+			KillRobot();
+		}
+	}
+
+	// 
+	protected void AssignTexture()
+	{
+		texIndex = (int) (Time.time / texChangeInterval);
+		
+		// Make the robot always face the player...
+		bool playerOnLeftSide = (GameEngine.Player.transform.position.x - transform.position.x < -1.0f);
+		
+		// If the robot is dead
+		if (isDead == true)
+		{
+			// display the platform textures...
+			rend.material = textureMaterials[(texIndex % 2) + 6 ];
+			rend.material.SetTextureScale("_MainTex", texScaleLeft);
+			robotCollider.center = turningLeftColliderPos;
+		}
+		
+		// If the robot is shooting...
+		else if (isShooting == true)
+		{
+			rend.material = textureMaterials[(texIndex % 2) + 4 ];
+			texScale = (playerOnLeftSide == true) ? texScaleLeft : texScaleRight;
+			rend.material.SetTextureScale("_MainTex", texScale);
+			robotCollider.center = (playerOnLeftSide == true) ? turningLeftColliderPos : turningRightColliderPos;
+		}
+		else
+		{
+			// Assign the material
+			rend.material = textureMaterials[texIndex % 4];
+			texScale = (playerOnLeftSide == true) ? texScaleLeft : texScaleRight;
+			rend.material.SetTextureScale("_MainTex", texScale);
+			robotCollider.center = (playerOnLeftSide == true) ? turningLeftColliderPos : turningRightColliderPos;
+		}
+	}
+	
+	//  Shoot an electric arrow towards the player 	
+	protected void Shoot()
+	{
+		isShooting = true;
+		shootingTimer = Time.time;
+		
+		Rigidbody shot = (Rigidbody) Instantiate(electricShot, transform.position, transform.rotation);
+		shot.transform.parent = gameObject.transform;
+		Physics.IgnoreCollision(shot.GetComponent<Collider>(), col);
+		
+		ElectricShot shotScript = shot.GetComponent<ElectricShot>();
+		if (shotScript)
+		{
+			shotScript.TargetDirection = GameEngine.Player.transform.position;
+		}
+	}
+	
+	// 
+	protected void CheckIfRobotCanShoot()
+	{
+		// If the robot is alive, check if he is in range to shoot the player
+		if (isDead == false)
+		{
+			// If the robot is in shooting range...
+			float distanceToPlayer = (GameEngine.Player.transform.position - transform.position).magnitude;
+			if (distanceToPlayer < shootingRangeDiameter)
+			{
+				// If the robot is ready to shoot...
+				if (isShooting == false && Time.time - shootingTimer >= shootAgainDelay)
+				{
+					Shoot();
+				}
+			}
+		}
+	}
+
+	#endregion
+
+
+	#region Public Functions
+
+	// 
+	public void SetIsShooting(bool status)
+	{
+		isShooting = status;
+	}
+	
+	// 
+	public void Reset()
+	{
+		isDead = false;
+		col.enabled = true;
+		currentHealth = health;
+	}
+
+	#endregion
 }

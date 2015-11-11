@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections;
 using System.Collections.Generic;
 	
@@ -19,12 +20,24 @@ public class SmallFlyingRobot : MonoBehaviour
 	protected float attackDelayTimer;
 	protected float distanceToDisappear = 32.0f;
 	protected float texChangeInterval = 0.2f;
+	protected Renderer rend = null;
+	protected Rigidbody rBody = null;
 
 	#endregion
 
 
 	#region MonoBehaviour
-	
+
+	// Constructor
+	protected void Awake()
+	{
+		rBody = GetComponent<Rigidbody>();
+		Assert.IsNotNull(rBody);
+
+		rend = GetComponent<Renderer>();
+		Assert.IsNotNull(rend);
+	}
+
 	// Use this for initialization 
 	protected void Start ()
 	{
@@ -43,7 +56,7 @@ public class SmallFlyingRobot : MonoBehaviour
 		}
 		else
 		{
-			Vector3 direction = Player.Instance.transform.position - transform.position;
+			Vector3 direction = GameEngine.Player.transform.position - transform.position;
 			
 			// Kill this object if the player is too far away
 			if (direction.magnitude >= distanceToDisappear)
@@ -52,14 +65,13 @@ public class SmallFlyingRobot : MonoBehaviour
 			}
 			else
 			{
-				direction.Normalize();
-				GetComponent<Rigidbody>().velocity = direction * (Time.deltaTime * robotSpeed);
+				rBody.velocity = direction.normalized * (Time.deltaTime * robotSpeed);
 			}
 		}
 		
 		// Update the textures...
 		texIndex = (int) (Time.time / texChangeInterval);
-		GetComponent<Renderer>().material = materials[texIndex % materials.Count];
+		rend.material = materials[texIndex % materials.Count];
 	}
 
 	//
@@ -67,7 +79,7 @@ public class SmallFlyingRobot : MonoBehaviour
 	{
 		if (other.tag == "Player")
 		{
-			Player.Instance.TakeDamage(damage);
+			GameEngine.Player.TakeDamage(damage);
 		}
 	}
 	
@@ -76,7 +88,7 @@ public class SmallFlyingRobot : MonoBehaviour
 	{
 		if (collision.gameObject.tag == "Player")
 		{
-			Player.Instance.TakeDamage(damage);
+			GameEngine.Player.TakeDamage(damage);
 		}
 	}
 
@@ -95,7 +107,7 @@ public class SmallFlyingRobot : MonoBehaviour
 	//
 	protected void TakeDamage(int damageTaken)
 	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_HURTING);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_HURTING);
 		health -= damageTaken;
 		if (health <= 0)
 		{

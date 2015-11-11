@@ -3,20 +3,25 @@ using System.Collections;
 
 public class BossDoor : MonoBehaviour 
 {
-	// protected Instance Variables
-	protected float playerSpeed;
-	protected float doorSpeed;
+	#region Variables
+
+	// Protected Instance Variables
+	protected float playerSpeed = 250f;
+	protected float doorSpeed = 10f;
 	protected bool isOpening = false;
 	protected bool isClosing = false;
 	protected bool hasPlayerGoneThrough = false;
-	protected Vector3 startScale;
+	protected Vector3 startScale = Vector3.zero;
 
+	#endregion
+
+
+	#region MonoBehaviour
 	
 	// Use this for initialization 
-	protected void Start () {
+	protected void Start()
+	{
 		startScale = transform.localScale;
-		playerSpeed = 250.0f;
-		doorSpeed = 10.0f;
 	}
 
 	// Update is called once per frame 
@@ -34,9 +39,9 @@ public class BossDoor : MonoBehaviour
 			if (transform.localScale.y <= 0.5)
 			{
 				isOpening = false;
-				Player.Instance.IsExternalForceActive = true;
-				Player.Instance.ExternalForce = new Vector3 (playerSpeed, 0.0f, 0.0f);
-				SoundManager.Instance.Stop(AirmanLevelSounds.BOSS_DOOR);
+				GameEngine.Player.IsExternalForceActive = true;
+				GameEngine.Player.ExternalForce = new Vector3 (playerSpeed, 0.0f, 0.0f);
+				GameEngine.SoundManager.Stop(AirmanLevelSounds.BOSS_DOOR);
 			}
 		}
 		
@@ -48,12 +53,17 @@ public class BossDoor : MonoBehaviour
 			{
 				isClosing = false;
 				hasPlayerGoneThrough = true;
-				Player.Instance.IsExternalForceActive = false;
-				SoundManager.Instance.Stop(AirmanLevelSounds.BOSS_DOOR);
+				GameEngine.Player.IsExternalForceActive = false;
+				GameEngine.SoundManager.Stop(AirmanLevelSounds.BOSS_DOOR);
 			}
 		}
 	}
-	
+
+	#endregion
+
+
+	#region Protected Functions
+
 	//
 	protected void Reset()
 	{
@@ -73,25 +83,30 @@ public class BossDoor : MonoBehaviour
 		transform.localScale = sc;
  
 		//Move the object on X axis in local units
-		pos.y -= scaleAmount/1.3f; 
+		pos.y -= scaleAmount / 1.3f; 
 		transform.localPosition = pos;
 	}
+
+	#endregion
 	
+	
+	#region Public Functions
+
 	//
-	protected void openDoor()
+	public void OpenDoor()
 	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_DOOR);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_DOOR);
 		gameObject.GetComponent<Collider>().isTrigger = true;
 		isOpening = true;
 	}
 	
 	//
-	protected void closeDoor()
+	public void CloseDoor()
 	{
-		SoundManager.Instance.Play(AirmanLevelSounds.BOSS_DOOR);
+		GameEngine.SoundManager.Play(AirmanLevelSounds.BOSS_DOOR);
 		gameObject.GetComponent<Collider>().isTrigger = false;
 		isClosing = true;
 	}	
 	
-
+	#endregion
 }

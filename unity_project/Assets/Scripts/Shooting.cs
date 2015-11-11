@@ -3,59 +3,75 @@ using System.Collections;
 
 public class Shooting : MonoBehaviour
 {
+	#region Variables
+
 	// Unity Editor Variables
-	public Rigidbody m_shotRigidBody;
+	[SerializeField] protected GameObject shotPrefab;
 	
 	// Properties
 	public bool CanShoot 	{ get; set; }
 	public bool IsShooting 	{ get; set; }
 	
-	// Private Instance Variables
-	private Vector3 m_shotPos;
-	private float m_shotSpeed = 20f;
-	private float m_delayBetweenShots = 0.2f;
-	private float m_shootingTimer;
+	// Protected Instance Variables
+	protected Vector3 shotPos;
+	protected float shotSpeed = 20f;
+	protected float delayBetweenShots = 0.2f;
+	protected float shootingTimer;
+
+	#endregion
 	
-	/**/
+	
+	#region MonoBehaviour
+
+	// Use this for initialization 
+	protected void Start()
+	{
+		CanShoot = true;
+		IsShooting = false;
+	}
+
+	// Update is called once per frame 
+	protected void Update()
+	{
+		if (IsShooting == true)
+		{
+			if (Time.time - shootingTimer >= delayBetweenShots)
+			{
+				IsShooting = false;	
+			}
+		}
+	}
+
+	#endregion
+	
+	
+	#region Public Functions
+
+	//
 	public void Reset()
 	{
 		CanShoot = true;
 		IsShooting = false;
 	}
 	
-	/* Use this for initialization */
-	void Start ()
-	{
-		CanShoot = true;
-		IsShooting = false;
-	}
-	
-	/**/
-	public void Shoot( bool isTurningLeft )
+	//
+	public void Shoot(bool isTurningLeft)
 	{
 		IsShooting = true;
-		m_shootingTimer = Time.time;
-		m_shotPos = transform.position + transform.right * ( ( isTurningLeft == true) ? -1.6f : 1.6f );
+		shootingTimer = Time.time;
+		shotPos = transform.position + transform.right * ((isTurningLeft == true) ? -1.6f : 1.6f);
 		
-		Rigidbody rocketClone = (Rigidbody) Instantiate(m_shotRigidBody, m_shotPos, transform.rotation);
-		rocketClone.transform.Rotate(90,0,0);
-		Physics.IgnoreCollision(rocketClone.GetComponent<Collider>(), GetComponent<Collider>());
+		GameObject rocketObj = (GameObject) Instantiate(shotPrefab, shotPos, transform.rotation);
+		Rigidbody rocketRBody = rocketObj.GetComponent<Rigidbody>();
+		rocketRBody.transform.Rotate(90,0,0);
+		Physics.IgnoreCollision(rocketRBody.GetComponent<Collider>(), GetComponent<Collider>());
 		
-		Shot s = rocketClone.GetComponent<Shot>();
-		s.VelocityDirection = ( isTurningLeft == true) ? -transform.right : transform.right;
-		s.ShotSpeed = m_shotSpeed;
+		Shot s = rocketRBody.GetComponent<Shot>();
+		s.VelocityDirection = (isTurningLeft == true) ? -transform.right : transform.right;
+		s.ShotSpeed = shotSpeed;
 	}
-	
-	/* Update is called once per frame */
-	void Update ()
-	{
-		if ( IsShooting == true )
-		{
-			if ( Time.time - m_shootingTimer >= m_delayBetweenShots )
-			{
-				IsShooting = false;	
-			}
-		}
-	}
+
+	#endregion
+
 }
 

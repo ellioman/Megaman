@@ -3,145 +3,102 @@ using System.Collections;
 
 public class RedHornBeast : MonoBehaviour
 {
+	#region Variables
+	
 	// Unity Editor Variables
 	public Rigidbody flyingRobot;
 	
-	// Private Instance Variables
-	private Transform m_light;								//
-	private GameObject m_spikeLeft;							//
-	private GameObject m_spikeRight;						//
-	private bool m_shouldAppear = false;					//
-	private bool m_startFighting = false;					//
-	private bool m_spikeRising = true;						//
-	private bool m_spikeLowering = false;					//
-	private bool m_createRobotOnRightSide = true;			//
-	private int m_robotCount = 0;							//
-	private float m_lightStartTime;							//
-	private float m_distanceToDisappear = 32.0f;			//
-	private float m_spikeStartHeight;						//
-	private float m_spikeRisingSpeed = 0.075f;				//
-	private float m_spikeLoweringSpeed = 1.00f;				//
-	private float m_spikeWaitTimer = 0.0f;					// Timer used for timing the spike while they wait
-	private float m_spikeDelayTime = 2.0f; 					// How long should the spike wait at the top?
-	private float m_robotCreateDelay = 2.0f; 				// Used so that a small delay is between creating robots
-	private float m_robotCreateDelayTimer; 					// Used so that a small delay is between creating robots
-	private Vector3 m_spikeTransforms;						// Used for transforming the spike when fighting
-	private Vector3 m_spikeLeftPos;							//
-	private Vector4 m_color = new Vector4(0f, 0f, 0f, 0f);	//
+	// Protected Instance Variables
+	protected int robotCount = 0;							//
+	protected bool shouldAppear = false;					//
+	protected bool startFighting = false;					//
+	protected bool spikeRising = true;						//
+	protected bool spikeLowering = false;					//
+	protected bool createRobotOnRightSide = true;			//
+	protected float lightStartTime;							//
+	protected float distanceToDisappear = 32.0f;			//
+	protected float spikeStartHeight;						//
+	protected float spikeRisingSpeed = 0.075f;				//
+	protected float spikeLoweringSpeed = 1.00f;				//
+	protected float spikeWaitTimer = 0.0f;					// Timer used for timing the spike while they wait
+	protected float spikeDelayTime = 2.0f; 					// How long should the spike wait at the top?
+	protected float robotCreateDelay = 2.0f; 				// Used so that a small delay is between creating robots
+	protected float robotCreateDelayTimer; 					// Used so that a small delay is between creating robots
+	protected Vector3 spikeTransforms;						// Used for transforming the spike when fighting
+	protected Vector3 spikeLeftPos;							//
+	protected Vector4 color = new Vector4(0f, 0f, 0f, 0f);	//
+	protected Transform lightTransform;						//
+	protected GameObject spikeLeft;							//
+	protected GameObject spikeRight;						//
+
+	#endregion
+
+
+	#region MonoBehaviour
 	
-	/* */
-	public void Appear()
+	// The Constructor function in Unity...
+	protected void Awake () 
 	{
-		m_shouldAppear = true;
-		m_lightStartTime = Time.time;
+		lightTransform = gameObject.transform.FindChild("Light").transform;
+		spikeLeft = transform.FindChild("SpikeLeft").gameObject;
+		spikeRight = transform.FindChild("SpikeRight").gameObject;
 	}
 	
-	/**/
-	public void MinusRobotCount() 
+	// Use this for initialization
+	protected void Start ()
 	{
-		m_robotCount--; m_robotCreateDelayTimer = Time.time;
-	}
-	
-	/**/
-	void ResetRedHornBeast()
-	{
-		m_shouldAppear = false;
-		m_startFighting = false;
-		m_color = new Vector4(0f, 0f, 0f, 0f);
-		GetComponent<Renderer>().material.color = m_color;
-		
-		Vector3 spikePos;
-		spikePos = m_spikeLeft.transform.position;
-		spikePos.y = m_spikeStartHeight;
-		m_spikeLeft.transform.position = spikePos;
-		spikePos.x = m_spikeRight.transform.position.x;
-		m_spikeRight.transform.position = spikePos;
-		
-		m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
-		m_spikeRight.GetComponent<Renderer>().material.color = m_color;
-		m_light.GetComponent<Renderer>().enabled = false;
-		m_createRobotOnRightSide = true;
-	}
-	
-	/**/
-	private void KillRobotChildren()
-	{
-		// Reset all the enemy bots...
-		Transform robot = transform.FindChild("Prb_SmallFlyingRobot(Clone)");
-		if ( robot != null)
-		{
-			Destroy(robot.gameObject);
-		}
-		m_robotCount = 0;	
-	}
-	
-	/*
-	 * 
-	 */
-	public void Reset()
-	{
-		ResetRedHornBeast();
-		KillRobotChildren();
-	}
-	
-	/* The Constructor function in Unity... */
-	void Awake () 
-	{
-		m_light = gameObject.transform.FindChild("Light").transform;
-		m_spikeLeft = transform.FindChild("SpikeLeft").gameObject;
-		m_spikeRight = transform.FindChild("SpikeRight").gameObject;
-	}
-	
-	/* Use this for initialization */
-	void Start ()
-	{
-		m_light.GetComponent<Renderer>().enabled = false;
-		m_spikeLeftPos = m_spikeLeft.transform.localPosition;
-		m_spikeStartHeight = m_spikeLeft.transform.position.y;
+		lightTransform.GetComponent<Renderer>().enabled = false;
+		spikeLeftPos = spikeLeft.transform.localPosition;
+		spikeStartHeight = spikeLeft.transform.position.y;
 		
 		// Make the robot and its children invisible...
-		GetComponent<Renderer>().material.color = m_color;
-		m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
-		m_spikeRight.GetComponent<Renderer>().material.color = m_color;
+		GetComponent<Renderer>().material.color = color;
+		spikeLeft.GetComponent<Renderer>().material.color = color;
+		spikeRight.GetComponent<Renderer>().material.color = color;
 	}
 	
-	/* Update is called once per frame */
-	void Update ()
+	// Update is called once per frame
+	protected void Update ()
 	{
-		if ( m_startFighting == true ) 
+		if ( startFighting == true ) 
 		{
 			MoveSpikes();
 			MakeLightBlink();
 			CreateSmallFlyingRobots();
 			
 			// Stop fighting if the player is too far away
-			if ( (Player.Instance.transform.position - transform.position).magnitude >= m_distanceToDisappear )
+			if ( (GameEngine.Player.transform.position - transform.position).magnitude >= distanceToDisappear )
 			{
 				ResetRedHornBeast();
 			}
 		}
 		
-		else if ( m_shouldAppear == true )
+		else if ( shouldAppear == true )
 		{
-			if ( m_color.x >= 1.0 )
+			if ( color.x >= 1.0 )
 			{
-				m_shouldAppear = false;
-				m_startFighting = true;
+				shouldAppear = false;
+				startFighting = true;
 			}
 			// Make the robot and its children visible...
 			else 
 			{
-				m_color.x = m_color.y = m_color.z = m_color.w += Time.deltaTime * 3.5f;
+				color.x = color.y = color.z = color.w += Time.deltaTime * 3.5f;
 			} 
 			
-			GetComponent<Renderer>().material.color = m_color;
-			m_spikeLeft.GetComponent<Renderer>().material.color = m_color;
-			m_spikeRight.GetComponent<Renderer>().material.color = m_color;
+			GetComponent<Renderer>().material.color = color;
+			spikeLeft.GetComponent<Renderer>().material.color = color;
+			spikeRight.GetComponent<Renderer>().material.color = color;
 		}
 	}
-	
-	/* */
-	void CreateRobot( float speed, Vector3 pos, Vector3 vel )
+
+	#endregion
+
+
+	#region Protected Functions
+
+	// 
+	protected void CreateRobot( float speed, Vector3 pos, Vector3 vel )
 	{
 		Rigidbody robot = (Rigidbody) Instantiate(flyingRobot, pos, transform.rotation);
 		Physics.IgnoreCollision(robot.GetComponent<Collider>(), GetComponent<Collider>());
@@ -149,12 +106,12 @@ public class RedHornBeast : MonoBehaviour
 		robot.velocity =  vel;
 	}
 	
-	/* */
-	void CreateSmallFlyingRobots()
+	// 
+	protected void CreateSmallFlyingRobots()
 	{
-		if ( m_robotCount < 1 && Time.time - m_robotCreateDelayTimer >= m_robotCreateDelay)
+		if ( robotCount < 1 && Time.time - robotCreateDelayTimer >= robotCreateDelay)
 		{
-			if ( m_createRobotOnRightSide )
+			if ( createRobotOnRightSide )
 			{
 				Vector3 pos = transform.position;
 				pos.x += transform.localScale.x / 2.0f;
@@ -169,57 +126,117 @@ public class RedHornBeast : MonoBehaviour
 				CreateRobot( 0.0f, pos, -Vector3.right );
 			}
 			
-			m_createRobotOnRightSide = !m_createRobotOnRightSide;
-			m_robotCount++;
+			createRobotOnRightSide = !createRobotOnRightSide;
+			robotCount++;
 		}
 	}
 	
-	/* */
-	void MoveSpikes()
+	// 
+	protected void MoveSpikes()
 	{
-		if ( m_spikeRising )
+		if ( spikeRising )
 		{
-			m_spikeTransforms = new Vector3(0f, m_spikeLeftPos.y * Time.deltaTime * m_spikeRisingSpeed, 0f);
-			m_spikeLeft.transform.localPosition += m_spikeTransforms;
-			m_spikeRight.transform.localPosition += m_spikeTransforms;
+			spikeTransforms = new Vector3(0f, spikeLeftPos.y * Time.deltaTime * spikeRisingSpeed, 0f);
+			spikeLeft.transform.localPosition += spikeTransforms;
+			spikeRight.transform.localPosition += spikeTransforms;
 			
-			if ( m_spikeLeft.transform.localPosition.y - m_spikeLeftPos.y >= 0.18f )
+			if ( spikeLeft.transform.localPosition.y - spikeLeftPos.y >= 0.18f )
 			{
-				m_spikeRising = false;
-				m_spikeLowering = false;
+				spikeRising = false;
+				spikeLowering = false;
 			}
 		}
 		// 
-		else if ( m_spikeLowering )
+		else if ( spikeLowering )
 		{
-			m_spikeTransforms = new Vector3(0f, m_spikeLeftPos.y * Time.deltaTime * m_spikeLoweringSpeed, 0f);
-			m_spikeLeft.transform.localPosition -= m_spikeTransforms;
-			m_spikeRight.transform.localPosition -= m_spikeTransforms;
+			spikeTransforms = new Vector3(0f, spikeLeftPos.y * Time.deltaTime * spikeLoweringSpeed, 0f);
+			spikeLeft.transform.localPosition -= spikeTransforms;
+			spikeRight.transform.localPosition -= spikeTransforms;
 			
-			if ( m_spikeLeft.transform.localPosition.y - m_spikeLeftPos.y <= 0.00f )
+			if ( spikeLeft.transform.localPosition.y - spikeLeftPos.y <= 0.00f )
 			{
-				m_spikeRising = true;
+				spikeRising = true;
 			}
 		}
 		else 
 		{
-			m_spikeWaitTimer += Time.deltaTime;
-			if ( m_spikeWaitTimer > m_spikeDelayTime )
+			spikeWaitTimer += Time.deltaTime;
+			if ( spikeWaitTimer > spikeDelayTime )
 			{
-				m_spikeLowering = true;
-				m_spikeWaitTimer = 0.0f;
+				spikeLowering = true;
+				spikeWaitTimer = 0.0f;
 			}
 		}
 	}
 	
-	/**/
-	void MakeLightBlink()
+	// 
+	protected void MakeLightBlink()
 	{
-		if ( Time.time - m_lightStartTime >= 0.1f )
+		if ( Time.time - lightStartTime >= 0.1f )
 		{
-			m_lightStartTime = Time.time;
-			m_light.GetComponent<Renderer>().enabled = !m_light.GetComponent<Renderer>().enabled;
+			lightStartTime = Time.time;
+			lightTransform.GetComponent<Renderer>().enabled = !lightTransform.GetComponent<Renderer>().enabled;
 		}
 	}
+	
+	// 
+	protected void ResetRedHornBeast()
+	{
+		shouldAppear = false;
+		startFighting = false;
+		color = new Vector4(0f, 0f, 0f, 0f);
+		GetComponent<Renderer>().material.color = color;
+		
+		Vector3 spikePos;
+		spikePos = spikeLeft.transform.position;
+		spikePos.y = spikeStartHeight;
+		spikeLeft.transform.position = spikePos;
+		spikePos.x = spikeRight.transform.position.x;
+		spikeRight.transform.position = spikePos;
+		
+		spikeLeft.GetComponent<Renderer>().material.color = color;
+		spikeRight.GetComponent<Renderer>().material.color = color;
+		lightTransform.GetComponent<Renderer>().enabled = false;
+		createRobotOnRightSide = true;
+	}
+	
+	// 
+	protected void KillRobotChildren()
+	{
+		// Reset all the enemy bots...
+		Transform robot = transform.FindChild("Prb_SmallFlyingRobot(Clone)");
+		if ( robot != null)
+		{
+			Destroy(robot.gameObject);
+		}
+		robotCount = 0;	
+	}
+
+	#endregion
+
+
+	#region Public Functions
+	
+	// 
+	public void Reset()
+	{
+		ResetRedHornBeast();
+		KillRobotChildren();
+	}
+
+	// 
+	public void Appear()
+	{
+		shouldAppear = true;
+		lightStartTime = Time.time;
+	}
+	
+	// 
+	public void MinusRobotCount() 
+	{
+		robotCount--; robotCreateDelayTimer = Time.time;
+	}
+
+	#endregion
 }
 
