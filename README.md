@@ -7,6 +7,9 @@ Megaman 2 is a classic platform game by Capcom which was released in 1988. This 
 
 I decided to recreate the airman stage from Megaman 2. The game was initially created on Unity3D 4.0 using C# but has been updated to use Unity 5.2.2. The graphics used in this game were found on various sprite websites. 
 
+## Requirements ##
+The project must be run on Unity3D version 5 or newer.
+
 ## Links ##
 
 * [Megaman 2 Wiki page](https://en.wikipedia.org/wiki/Mega_Man_2 "Megaman 2 Wiki page") 
